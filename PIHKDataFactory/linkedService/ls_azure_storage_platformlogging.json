@@ -1,0 +1,19 @@
+{
+	"name": "pmxdatadwhstorage2dev",
+	"properties": {
+		"description": "Blob storage for errors and logging",
+		"annotations": [],
+		"type": "AzureBlobStorage",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "pmxdata_kv",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "pmxdatadwhstorage2dev-connstring"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
+}

@@ -1,0 +1,367 @@
+{
+	"name": "pl_copy_manual_to_landingzone",
+	"properties": {
+		"activities": [
+			{
+				"name": "copy_file",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "update_audit",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": false,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"enableSkipIncompatibleRow": false
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_csv_dynamic",
+						"type": "DatasetReference",
+						"parameters": {
+							"FileContainer": {
+								"value": "@pipeline().parameters.SourceContainer",
+								"type": "Expression"
+							},
+							"FilePath": {
+								"value": "@pipeline().parameters.SourcePath",
+								"type": "Expression"
+							},
+							"FileName": {
+								"value": "@pipeline().parameters.SourceFile",
+								"type": "Expression"
+							},
+							"Delimiter": ","
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_datalake_filesystem_folder_name_dynamic",
+						"type": "DatasetReference",
+						"parameters": {
+							"FileSystem": {
+								"value": "@pipeline().parameters.TargetContainer",
+								"type": "Expression"
+							},
+							"Directory": {
+								"value": "@pipeline().parameters.TargetPath",
+								"type": "Expression"
+							},
+							"FileName": {
+								"value": "@pipeline().parameters.TargetFile",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "end_audit",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "copy_file",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "etl.ADFAuditUpdate",
+					"storedProcedureParameters": {
+						"ADFAuditKey": {
+							"value": {
+								"value": "@activity('start_audit').output.firstRow.ADFAuditKey",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"RowsCopied": {
+							"value": {
+								"value": "@activity('copy_file').output.rowsCopied",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"RowsRead": {
+							"value": {
+								"value": "@activity('copy_file').output.rowsRead",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"EndPipeline": {
+							"value": "True",
+							"type": "Boolean"
+						},
+						"Status": {
+							"value": "Success",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "pmx_azure_metadata_sql_db",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "start_audit",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "etl.ADFAuditStart",
+						"storedProcedureParameters": {
+							"DataFactoryName": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().DataFactory",
+									"type": "Expression"
+								}
+							},
+							"PipelineName": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								}
+							},
+							"PipelineRunID": {
+								"type": "Guid",
+								"value": {
+									"value": "@pipeline().RunId",
+									"type": "Expression"
+								}
+							},
+							"PipelineTriggerID": {
+								"type": "Guid",
+								"value": {
+									"value": "@pipeline().TriggerId",
+									"type": "Expression"
+								}
+							},
+							"PipelineTriggerName": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().TriggerName",
+									"type": "Expression"
+								}
+							},
+							"PipelineTriggerType": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().TriggerType",
+									"type": "Expression"
+								}
+							},
+							"ADFActionKey": {
+								"type": "Int64",
+								"value": null
+							},
+							"ParentADFAuditKey": {
+								"type": "Int64",
+								"value": null
+							}
+						}
+					},
+					"dataset": {
+						"referenceName": "ds_azure_sql_metadata",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": true
+				}
+			},
+			{
+				"name": "update_audit",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "set TargetFileName",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "etl.ADFAuditUpdate",
+					"storedProcedureParameters": {
+						"ADFAuditKey": {
+							"value": {
+								"value": "@activity('start_audit').output.firstRow.ADFAuditKey",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"DataLakeFilePath": {
+							"value": {
+								"value": "@concat('from \"', pipeline().parameters.SourceContainer, '/', pipeline().parameters.SourcePath, '/', pipeline().parameters.SourceFile, '\" to \"', pipeline().parameters.TargetContainer, '\"/', pipeline().parameters.TargetPath, '/', pipeline().parameters.TargetFile, '\"')",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"Status": {
+							"value": "Set variable values",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "pmx_azure_metadata_sql_db",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "set FileNameWithoutExtension",
+				"description": "removes the file extension from the SourceFile value. currently this pipeline does not support files with no file extension.",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "start_audit",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "FileNameWithoutExtension",
+					"value": {
+						"value": "@substring(pipeline().parameters.SourceFile, 0, lastindexof(pipeline().parameters.SourceFile, '.'))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "set TargetPath",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "set FileNameWithoutExtension",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "TargetPath",
+					"value": {
+						"value": "@concat('manual/', pipeline().parameters.SourcePath, if(endswith(pipeline().parameters.SourcePath, '/'), '', '/'), variables('FileNameWithoutExtension'))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "set TargetFileName",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "set TargetPath",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "TargetFileName",
+					"value": {
+						"value": "@concat(variables('FileNameWithoutExtension'), '.parquet')",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"SourceContainer": {
+				"type": "string"
+			},
+			"SourcePath": {
+				"type": "string"
+			},
+			"SourceFile": {
+				"type": "string"
+			},
+			"TargetContainer": {
+				"type": "string"
+			},
+			"TargetPath": {
+				"type": "string"
+			},
+			"TargetFile": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"FileNameWithoutExtension": {
+				"type": "String"
+			},
+			"TargetPath": {
+				"type": "String"
+			},
+			"TargetFileName": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "csv"
+		},
+		"annotations": []
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

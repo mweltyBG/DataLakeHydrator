@@ -1,0 +1,11 @@
+{
+	"name": "pmxdata_kv",
+	"properties": {
+		"description": "Development key vault connection",
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://pmx-data-kv-dev.vault.azure.net/"
+		}
+	}
+}

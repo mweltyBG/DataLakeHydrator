@@ -1,0 +1,11 @@
+{
+	"name": "ls_azure_keyvault_phkdata",
+	"properties": {
+		"description": "Hong Kong Dev Key Vault",
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://phkdata-kv-dev.vault.azure.net/"
+		}
+	}
+}

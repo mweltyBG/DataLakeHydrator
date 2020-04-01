@@ -1,0 +1,324 @@
+{
+	"name": "pl_loop_storedprocedure_azure",
+	"properties": {
+		"activities": [
+			{
+				"name": "start_audit",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlSource",
+						"sqlReaderStoredProcedureName": "[etl].[ADFAuditStart]",
+						"storedProcedureParameters": {
+							"DataFactoryName": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().DataFactory",
+									"type": "Expression"
+								}
+							},
+							"PipelineName": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								}
+							},
+							"PipelineRunID": {
+								"type": "Guid",
+								"value": {
+									"value": "@pipeline().RunId",
+									"type": "Expression"
+								}
+							},
+							"PipelineTriggerID": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().TriggerId",
+									"type": "Expression"
+								}
+							},
+							"PipelineTriggerName": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().TriggerName",
+									"type": "Expression"
+								}
+							},
+							"PipelineTriggerType": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().TriggerType",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					"dataset": {
+						"referenceName": "ds_azure_sql_metadata",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "get_adf_actions",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "start_audit",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[etl].[GetADFActions]",
+						"storedProcedureParameters": {
+							"DataLoadType": {
+								"type": "String",
+								"value": {
+									"value": "@variables('DataLoadType')",
+									"type": "Expression"
+								}
+							},
+							"ETLSTage": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.ETLStage",
+									"type": "Expression"
+								}
+							},
+							"SourceDB": {
+								"type": "String",
+								"value": {
+									"value": "@variables('SourceDB')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					"dataset": {
+						"referenceName": "ds_azure_sql_metadata",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "loop_through_actions",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "get_adf_actions",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('get_adf_actions').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 8,
+					"activities": [
+						{
+							"name": "pl_exec_storedprocedure_azure",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "pl_exec_storedprocedure_azure",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"ADFActionKey": {
+										"value": "@item().ADFActionKey",
+										"type": "Expression"
+									},
+									"ParentADFAuditKey": {
+										"value": "@activity('start_audit').output.firstRow.ADFAuditKey",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "adf_log_error",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "pl_exec_storedprocedure_azure",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "etl.ADFAuditLogADFError",
+								"storedProcedureParameters": {
+									"ADFAuditKey": {
+										"value": null,
+										"type": "Int64"
+									},
+									"Category": {
+										"value": null,
+										"type": "String"
+									},
+									"Code": {
+										"value": {
+											"value": "@json(activity('pl_exec_storedprocedure_azure').output).pipelineRunId",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"ErrorMessage": {
+										"value": {
+											"value": "@activity('pl_exec_storedprocedure_azure').error.message",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"EventType": {
+										"value": null,
+										"type": "String"
+									},
+									"ExceptionType": {
+										"value": null,
+										"type": "String"
+									},
+									"PipelineRunID": {
+										"value": {
+											"value": "@json(activity('pl_exec_storedprocedure_azure').output).pipelineRunId",
+											"type": "Expression"
+										},
+										"type": "Guid"
+									},
+									"Source": {
+										"value": null,
+										"type": "String"
+									},
+									"StackTrace": {
+										"value": null,
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "pmx_azure_metadata_sql_db",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "end_audit",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "loop_through_actions",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "etl.ADFAuditUpdate",
+					"storedProcedureParameters": {
+						"ADFAuditKey": {
+							"value": {
+								"value": "@activity('start_audit').output.firstRow.ADFAuditKey",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"RowsCopied": {
+							"value": {
+								"value": "0",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"RowsRead": {
+							"value": "0",
+							"type": "Int64"
+						},
+						"EndPipeline": {
+							"value": "True",
+							"type": "Boolean"
+						},
+						"Status": {
+							"value": "Success",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "pmx_azure_metadata_sql_db",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"ETLStage": {
+				"type": "string",
+				"defaultValue": "3.1_ProcessDimensionalModel"
+			}
+		},
+		"variables": {
+			"SourceDB": {
+				"type": "String",
+				"defaultValue": "azure"
+			},
+			"DataLoadType": {
+				"type": "String",
+				"defaultValue": "storedprocedure"
+			}
+		},
+		"folder": {
+			"name": "data warehouse"
+		},
+		"annotations": []
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

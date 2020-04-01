@@ -1,0 +1,19 @@
+{
+	"name": "ds_datalake_deploySource",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "pmxdatadwhstoragedev",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileSystem": "staging"
+			},
+			"compressionCodec": "none"
+		},
+		"schema": []
+	}
+}

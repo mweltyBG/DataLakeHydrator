@@ -1,0 +1,7 @@
+{
+	"name": "phkdata-ir-dev",
+	"properties": {
+		"type": "SelfHosted",
+		"description": "Single node, self hosted runtime"
+	}
+}

@@ -1,0 +1,254 @@
+{
+	"name": "pl_automation_prep_sql_dw",
+	"properties": {
+		"description": "Execute this pipeline, passing in parameters for Action and Service Objective, to prep the sql dw for loading or to clean up after loading.",
+		"activities": [
+			{
+				"name": "end_audit",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Call Set-SqlDwhForLoading Automation",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "ETL.ADFAuditUpdate",
+					"storedProcedureParameters": {
+						"ADFAuditKey": {
+							"value": {
+								"value": "@activity('start_audit').output.firstRow.ADFAuditKey",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"RowsCopied": {
+							"value": null,
+							"type": "Int64"
+						},
+						"RowsRead": {
+							"value": null,
+							"type": "Int64"
+						},
+						"EndPipeline": {
+							"value": "True",
+							"type": "Boolean"
+						},
+						"Status": {
+							"value": "Success",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "pmx_azure_metadata_sql_db",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "start_audit",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[etl].[ADFAuditStart]",
+						"storedProcedureParameters": {
+							"DataFactoryName": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().DataFactory",
+									"type": "Expression"
+								}
+							},
+							"PipelineName": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								}
+							},
+							"PipelineRunID": {
+								"type": "Guid",
+								"value": {
+									"value": "@pipeline().RunId",
+									"type": "Expression"
+								}
+							},
+							"PipelineTriggerID": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().TriggerId",
+									"type": "Expression"
+								}
+							},
+							"PipelineTriggerName": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().TriggerName",
+									"type": "Expression"
+								}
+							},
+							"PipelineTriggerType": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().TriggerType",
+									"type": "Expression"
+								}
+							},
+							"ADFActionKey": {
+								"type": "Int64",
+								"value": null
+							},
+							"ParentADFAuditKey": {
+								"type": "Int64",
+								"value": null
+							}
+						}
+					},
+					"dataset": {
+						"referenceName": "ds_azure_sql_metadata",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": true
+				}
+			},
+			{
+				"name": "Call Set-SqlDwhForLoading Automation",
+				"type": "WebHook",
+				"dependsOn": [
+					{
+						"activity": "start_audit",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://s5events.azure-automation.net/webhooks?token=Ih3hJYYqyLYjRcZ8hO6TyOAWErTEfnTUt3e2anix6RM%3d",
+					"method": "POST",
+					"body": {
+						"value": "@json(concat('{\"Action\": \"', pipeline().parameters.Action, '\", \"ServiceObjective\":\"',pipeline().parameters.ServiceObjective, '\"}'))",
+						"type": "Expression"
+					},
+					"timeout": "01:00:00",
+					"reportStatusOnCallBack": true
+				}
+			},
+			{
+				"name": "adf_log_error",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Call Set-SqlDwhForLoading Automation",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "etl.ADFAuditLogADFError",
+					"storedProcedureParameters": {
+						"ADFAuditKey": {
+							"value": null,
+							"type": "Int64"
+						},
+						"Category": {
+							"value": null,
+							"type": "String"
+						},
+						"Code": {
+							"value": {
+								"value": "@json(activity('Call Set-SqlDwhForLoading Automation').output).pipelineRunId",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"ErrorMessage": {
+							"value": {
+								"value": "@activity('Call Set-SqlDwhForLoading Automation').error.message",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"EventType": {
+							"value": null,
+							"type": "String"
+						},
+						"ExceptionType": {
+							"value": null,
+							"type": "String"
+						},
+						"PipelineRunID": {
+							"value": {
+								"value": "@json(activity('Call Set-SqlDwhForLoading Automation').output).pipelineRunId",
+								"type": "Expression"
+							},
+							"type": "Guid"
+						},
+						"Source": {
+							"value": null,
+							"type": "String"
+						},
+						"StackTrace": {
+							"value": null,
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "pmx_azure_metadata_sql_db",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"Action": {
+				"type": "string",
+				"defaultValue": "Pause"
+			},
+			"ServiceObjective": {
+				"type": "string",
+				"defaultValue": "DW100c"
+			}
+		},
+		"variables": {
+			"SourceDB": {
+				"type": "String",
+				"defaultValue": "csv"
+			}
+		},
+		"folder": {
+			"name": "automation"
+		},
+		"annotations": []
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,13 @@
+{
+	"name": "ds_azure_sql_metadata",
+	"properties": {
+		"description": "Dynamic dataset used to execute stored procedures and queries against the metadata database.",
+		"linkedServiceName": {
+			"referenceName": "pmx_azure_metadata_sql_db",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": []
+	}
+}

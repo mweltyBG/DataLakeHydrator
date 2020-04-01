@@ -1,0 +1,31 @@
+{
+	"name": "Manual_CSV_Copy",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "pl_parent_manual_to_landingzone",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceContainer": "manual",
+					"SourcePath": "@triggerBody().folderPath",
+					"SourceFile": "@triggerBody().fileName",
+					"TargetContainer": "staging"
+				}
+			}
+		],
+		"type": "BlobEventsTrigger",
+		"typeProperties": {
+			"blobPathBeginsWith": "/manual/blobs/",
+			"blobPathEndsWith": ".csv",
+			"ignoreEmptyBlobs": true,
+			"scope": "/subscriptions/6950b088-3ab5-4ccc-a19c-1661040f3936/resourceGroups/data-ecosystem/providers/Microsoft.Storage/storageAccounts/pmxdatadwhstoragedev",
+			"events": [
+				"Microsoft.Storage.BlobCreated"
+			]
+		}
+	}
+}

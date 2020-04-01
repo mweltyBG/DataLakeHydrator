@@ -1,0 +1,8 @@
+﻿CREATE USER [pi-azure-data] FOR EXTERNAL PROVIDER;
+
+GO
+
+GRANT CONNECT TO [pi-azure-data];
+GO
+GRANT VIEW DEFINITION TO [pi-azure-data];
+GO

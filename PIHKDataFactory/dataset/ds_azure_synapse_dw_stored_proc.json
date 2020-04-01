@@ -1,0 +1,12 @@
+{
+	"name": "ds_azure_sql_dw_dynamic_stored_procedure",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "pmx_azure_sqldw",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlDWTable",
+		"schema": []
+	}
+}

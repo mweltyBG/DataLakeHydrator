@@ -1,0 +1,31 @@
+{
+	"name": "pmx_siif_sqlserver",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "pmxdata_kv",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "pmx-siif-sqlserver-connstring"
+			},
+			"userName": "pfgmexico\\PMXDATASIIFP",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "pmxdata_kv",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "pmx-siif-sqlserver-password"
+			}
+		},
+		"connectVia": {
+			"referenceName": "pmxdata-ir-dev",
+			"type": "IntegrationRuntimeReference"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
+}

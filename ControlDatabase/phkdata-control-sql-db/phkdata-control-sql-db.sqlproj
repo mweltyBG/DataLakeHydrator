@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>phkdata_control_sql_db</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{59737143-87ad-4f88-8c91-01d8cc26d5f9}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.SqlAzureV12DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>phkdata_control_sql_db</RootNamespace>
+    <AssemblyName>phkdata_control_sql_db</AssemblyName>
+    <ModelCollation>1033, CI</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="etl" />
+    <Folder Include="etl\Scripts" />
+    <Folder Include="etl\Stored Procedures" />
+    <Folder Include="etl\Tables" />
+    <Folder Include="etl\Views" />
+    <Folder Include="Security" />
+    <Folder Include="Security\Users" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="etl\Stored Procedures\ADFAuditEnd.sql" />
+    <Build Include="etl\Stored Procedures\ADFAuditStart.sql" />
+    <Build Include="etl\Stored Procedures\ADFAuditUpdate.sql" />
+    <Build Include="etl\Stored Procedures\GetStagingQueries.sql" />
+    <Build Include="etl\Tables\ADFActions.sql" />
+    <Build Include="etl\Tables\ADFAudit.sql" />
+    <Build Include="etl\Tables\ADFConfig.sql" />
+    <Build Include="etl\Tables\ADFConnections.sql" />
+    <Build Include="etl\Views\ADFSources.sql" />
+    <Build Include="etl\Views\MasterPipelines.sql" />
+    <Build Include="etl\Views\PipelinePatterns.sql" />
+    <Build Include="etl\Views\TableRecordCounts.sql" />
+    <Build Include="Security\etl.sql" />
+    <Build Include="Security\Users\pi-azure-pgs.sql" />
+    <Build Include="Security\Users\pi-azure-data-consultant.sql" />
+    <Build Include="Security\Users\pi-azure-data.sql" />
+    <Build Include="etl\Tables\ADFErrors.sql" />
+    <Build Include="etl\Stored Procedures\ADFAuditLogADFError.sql" />
+    <Build Include="etl\Views\ETLStage_3_StageTables.sql" />
+    <Build Include="etl\Views\ETLStage_3.5_ProcessFactTables.sql" />
+    <Build Include="etl\Views\ETLStage_3.3_ProcessBridgeTables.sql" />
+    <Build Include="etl\Views\ETLStage_3.1_ProcessDimensionTables.sql" />
+    <Build Include="etl\Views\ETLStage_2_ProcessCuratedData.sql" />
+    <Build Include="etl\Views\ETLStage_1_HydrateLake.sql" />
+    <Build Include="etl\Views\ETLStage_1.5_ArchiveLandingZone.sql" />
+    <Build Include="etl\Stored Procedures\GetADFActions.sql" />
+    <Build Include="etl\Stored Procedures\SetLimitAuditInfo.sql" />
+    <Build Include="etl\Tables\ADFLimitAudit.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\AzureV12\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\AzureV12\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+  </ItemGroup>
+</Project>

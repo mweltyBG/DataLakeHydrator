@@ -1,0 +1,514 @@
+{
+	"name": "pl_parent_manual_to_landingzone",
+	"properties": {
+		"activities": [
+			{
+				"name": "start_audit",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[etl].[ADFAuditStart]",
+						"storedProcedureParameters": {
+							"ADFActionKey": {
+								"type": "Int64",
+								"value": null
+							},
+							"DataFactoryName": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().DataFactory",
+									"type": "Expression"
+								}
+							},
+							"ParentADFAuditKey": {
+								"type": "Int64",
+								"value": null
+							},
+							"PipelineName": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								}
+							},
+							"PipelineRunID": {
+								"type": "Guid",
+								"value": {
+									"value": "@pipeline().RunId",
+									"type": "Expression"
+								}
+							},
+							"PipelineTriggerID": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().TriggerId",
+									"type": "Expression"
+								}
+							},
+							"PipelineTriggerName": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().TriggerName",
+									"type": "Expression"
+								}
+							},
+							"PipelineTriggerType": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().TriggerType",
+									"type": "Expression"
+								}
+							}
+						},
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "ds_azure_sql_metadata",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "end_audit",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "execute_datalake_to_staging",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[etl].[ADFAuditUpdate]",
+					"storedProcedureParameters": {
+						"ADFAuditKey": {
+							"value": {
+								"value": "@activity('start_audit').output.firstRow.ADFAuditKey",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"RowsCopied": {
+							"value": {
+								"value": "0",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"RowsRead": {
+							"value": "0",
+							"type": "Int64"
+						},
+						"EndPipeline": {
+							"value": "True",
+							"type": "Boolean"
+						},
+						"Status": {
+							"value": "Success",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "pmx_azure_metadata_sql_db",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "execute_pl_copy_manual_to_landingzone",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "set TargetFileName",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_copy_manual_to_landingzone",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"SourceContainer": {
+							"value": "@pipeline().parameters.SourceContainer",
+							"type": "Expression"
+						},
+						"SourcePath": {
+							"value": "@variables('SourcePathWithoutContainer')",
+							"type": "Expression"
+						},
+						"SourceFile": {
+							"value": "@pipeline().parameters.SourceFile",
+							"type": "Expression"
+						},
+						"TargetContainer": {
+							"value": "@pipeline().parameters.TargetContainer",
+							"type": "Expression"
+						},
+						"TargetPath": {
+							"value": "@variables('TargetPath')",
+							"type": "Expression"
+						},
+						"TargetFile": {
+							"value": "@variables('TargetFileName')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "adf_log_error_copy_manual_to_landingzone",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "execute_pl_copy_manual_to_landingzone",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "etl.ADFAuditLogADFError",
+					"storedProcedureParameters": {
+						"ADFAuditKey": {
+							"value": null,
+							"type": "Int64"
+						},
+						"Category": {
+							"value": null,
+							"type": "String"
+						},
+						"Code": {
+							"value": null,
+							"type": "String"
+						},
+						"ErrorMessage": {
+							"value": {
+								"value": "@activity('execute_pl_copy_manual_to_landingzone').error.message",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"EventType": {
+							"value": null,
+							"type": "String"
+						},
+						"ExceptionType": {
+							"value": null,
+							"type": "String"
+						},
+						"PipelineRunID": {
+							"value": {
+								"value": "@json(activity('execute_pl_copy_manual_to_landingzone').output).pipelineRunId",
+								"type": "Expression"
+							},
+							"type": "Guid"
+						},
+						"Source": {
+							"value": null,
+							"type": "String"
+						},
+						"StackTrace": {
+							"value": null,
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "pmx_azure_metadata_sql_db",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "end_audit_copy_error_copy_manual_to_landingzone",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "adf_log_error_copy_manual_to_landingzone",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[etl].[ADFAuditUpdate]",
+					"storedProcedureParameters": {
+						"ADFAuditKey": {
+							"value": {
+								"value": "@activity('start_audit').output.firstRow.ADFAuditKey",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"RowsCopied": {
+							"value": {
+								"value": "0",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"RowsRead": {
+							"value": "0",
+							"type": "Int64"
+						},
+						"EndPipeline": {
+							"value": "True",
+							"type": "Boolean"
+						},
+						"Status": {
+							"value": "Failed",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "pmx_azure_metadata_sql_db",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "set FileNameWithoutExtension",
+				"description": "removes the file extension from the SourceFile value. currently this pipeline does not support files with no file extension.",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "set SourcePathWithoutContainer",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "FileNameWithoutExtension",
+					"value": {
+						"value": "@substring(pipeline().parameters.SourceFile, 0, lastindexof(pipeline().parameters.SourceFile, '.'))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "set TargetPath",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "set FileNameWithoutExtension",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "TargetPath",
+					"value": {
+						"value": "@concat('manual/', variables('SourcePathWithoutContainer'), if(endswith(variables('SourcePathWithoutContainer'), '/'), '', '/'), variables('FileNameWithoutExtension'))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "set TargetFileName",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "set TargetPath",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "TargetFileName",
+					"value": {
+						"value": "@concat(variables('FileNameWithoutExtension'), '.parquet')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "validation_landingzone_file_exists",
+				"type": "Validation",
+				"dependsOn": [
+					{
+						"activity": "execute_pl_copy_manual_to_landingzone",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "ds_datalake_filesystem_folder_name_dynamic",
+						"type": "DatasetReference",
+						"parameters": {
+							"FileSystem": "staging",
+							"Directory": {
+								"value": "@variables('TargetPath')",
+								"type": "Expression"
+							},
+							"FileName": {
+								"value": "@variables('TargetFileName')",
+								"type": "Expression"
+							}
+						}
+					},
+					"timeout": "7.00:00:00",
+					"sleep": 10
+				}
+			},
+			{
+				"name": "execute_copy_to_raw",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "validation_landingzone_file_exists",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_loop_landingzone_to_raw",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"ETLStage": "ManualTriggerArchiveLandingZone",
+						"SourcePath": {
+							"value": "@variables('TargetPath')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "execute_datalake_to_staging",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "execute_copy_to_raw",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_loop_datalake_to_staging",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"ETLStage": "ManualTriggerStageTables",
+						"SourceContainer": "staging",
+						"SourcePath": {
+							"value": "@variables('TargetPath')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "set SourcePathWithoutContainer",
+				"description": "ADF appears to be combining the container/blog name with the path in the trigger's \"@triggerBody().folderPath\" variable. Check the SourcePath variable and if it starts with the container name, remove that.",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "start_audit",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "SourcePathWithoutContainer",
+					"value": {
+						"value": "@if(startswith(pipeline().parameters.SourcePath, concat(pipeline().parameters.SourceContainer, '/')), replace(pipeline().parameters.SourcePath, concat(pipeline().parameters.SourceContainer, '/'), ''), pipeline().parameters.SourcePath)",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"SourceContainer": {
+				"type": "string",
+				"defaultValue": "manual"
+			},
+			"SourcePath": {
+				"type": "string"
+			},
+			"SourceFile": {
+				"type": "string"
+			},
+			"TargetContainer": {
+				"type": "string",
+				"defaultValue": "staging"
+			}
+		},
+		"variables": {
+			"FileNameWithoutExtension": {
+				"type": "String"
+			},
+			"TargetPath": {
+				"type": "String"
+			},
+			"TargetFileName": {
+				"type": "String"
+			},
+			"SourcePathWithoutContainer": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "csv"
+		},
+		"annotations": []
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

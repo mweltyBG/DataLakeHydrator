@@ -1,0 +1,18 @@
+{
+	"name": "pmx_azure_metadata_sql_db",
+	"properties": {
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "pmxdata_kv",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "pmx-azure-metadata-sqldb-connstring"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
+}

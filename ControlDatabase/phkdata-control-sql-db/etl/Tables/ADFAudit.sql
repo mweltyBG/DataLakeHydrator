@@ -1,0 +1,31 @@
+﻿CREATE TABLE [etl].[ADFAudit] (
+    [ADFAuditKey]         BIGINT           IDENTITY (1, 1) NOT NULL,
+    [ParentADFAuditKey]   BIGINT           NULL,
+    [ADFActionKey]        BIGINT           NULL,
+    [ETLStage]            NVARCHAR (50)    DEFAULT ('') NOT NULL,
+    [SourceDB]            NVARCHAR (255)   DEFAULT ('') NOT NULL,
+    [SourceTableName]     NVARCHAR (500)   DEFAULT ('') NOT NULL,
+    [TableName]           NVARCHAR (500)   DEFAULT ('') NOT NULL,
+    [DataLakeFilePath]    NVARCHAR (4000)  NULL,
+    [StoredProcedureName] NVARCHAR (500)   DEFAULT ('') NOT NULL,
+    [DataFactoryName]     NVARCHAR (50)    NOT NULL,
+    [PipelineName]        NVARCHAR (50)    NOT NULL,
+    [PipelineRunID]       UNIQUEIDENTIFIER NOT NULL,
+    [PipelineStartTime]   DATETIME         NULL,
+    [PipelineEndTime]     DATETIME         NULL,
+    [PipelineTriggerName] NVARCHAR (50)    NULL,
+    [PipelineTriggerID]   NVARCHAR (36)    NULL,
+    [PipelineTriggerType] NVARCHAR (50)    NULL,
+    [RowsRead]            BIGINT           NULL,
+    [RowsCopied]          BIGINT           NULL,
+    [RowsSkipped]         BIGINT           NULL,
+    [RowsInserted]        BIGINT           NULL,
+    [RowsUpdated]         BIGINT           NULL,
+    [RowsDeleted]         BIGINT           NULL,
+    [Status]              NVARCHAR (200)   NULL,
+    [LastUpdate]          DATETIME2 (7)    DEFAULT (sysutcdatetime()) NULL,
+    [Debug]               NVARCHAR (4000)  NULL,
+    CONSTRAINT [PK_etl_ADFAudit] PRIMARY KEY CLUSTERED ([ADFAuditKey] ASC)
+);
+
+

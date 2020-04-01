@@ -1,0 +1,35 @@
+{
+	"name": "ds_datalake_file_system_folder_dynamic",
+	"properties": {
+		"description": "Use this dataset to load uncompressed parquet data to or from a directory, rather than a file, in the data lake. Requires FileSystem and Directory to be passed.",
+		"linkedServiceName": {
+			"referenceName": "pmxdatadwhstoragedev",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"FileSystem": {
+				"type": "string"
+			},
+			"Directory": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": {
+					"value": "@dataset().Directory",
+					"type": "Expression"
+				},
+				"fileSystem": {
+					"value": "@dataset().FileSystem",
+					"type": "Expression"
+				}
+			},
+			"compressionCodec": "none"
+		},
+		"schema": []
+	}
+}

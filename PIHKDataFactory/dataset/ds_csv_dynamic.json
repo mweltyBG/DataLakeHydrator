@@ -1,0 +1,59 @@
+{
+	"name": "ds_csv_dynamic",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "pmxdatadwhstoragedev",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"FileContainer": {
+				"type": "string",
+				"defaultValue": "Container"
+			},
+			"FilePath": {
+				"type": "string",
+				"defaultValue": "Path"
+			},
+			"FileName": {
+				"type": "string",
+				"defaultValue": "FileName.csv"
+			},
+			"Delimiter": {
+				"type": "string",
+				"defaultValue": ","
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().FileName",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().FilePath",
+					"type": "Expression"
+				},
+				"fileSystem": {
+					"value": "@dataset().FileContainer",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": {
+				"value": "@if(equals(dataset().Delimiter,''),',',dataset().Delimiter)",
+				"type": "Expression"
+			},
+			"compressionCodec": {
+				"value": "@if(endswith(dataset().FileName,'.zip'),'zipDeflate',if(endswith(dataset().FileName,'.gz'),'gzip','none'))",
+				"type": "Expression"
+			},
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

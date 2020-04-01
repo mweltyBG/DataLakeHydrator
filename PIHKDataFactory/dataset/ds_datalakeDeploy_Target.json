@@ -1,0 +1,19 @@
+{
+	"name": "ds_datalakeDeploy_Target",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "pmxdatalakeprod",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileSystem": "staging"
+			},
+			"compressionCodec": "none"
+		},
+		"schema": []
+	}
+}
