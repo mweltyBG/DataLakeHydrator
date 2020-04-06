@@ -337,10 +337,6 @@
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="dbo\Stored Procedures\usp_DeleteDB2Status.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
     <Build Include="Updates\Tables\Fact_SalesBudget_Update.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
