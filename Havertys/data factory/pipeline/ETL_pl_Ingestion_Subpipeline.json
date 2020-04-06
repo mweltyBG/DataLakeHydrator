@@ -165,7 +165,7 @@
 										"SchemaTable": {
 											"type": "String",
 											"value": {
-												"value": "@item().DB2SchemaTable",
+												"value": "@item().SourceSchemaTable",
 												"type": "Expression"
 											}
 										},
@@ -645,10 +645,10 @@
 									"type": "AzureSqlSource",
 									"sqlReaderStoredProcedureName": "[dbo].[usp_MetadataListDB2Sql]",
 									"storedProcedureParameters": {
-										"DB2SchemaTable": {
+										"SourceSchemaTable": {
 											"type": "String",
 											"value": {
-												"value": "@item().DB2SchemaTable",
+												"value": "@item().SourceSchemaTable",
 												"type": "Expression"
 											}
 										},

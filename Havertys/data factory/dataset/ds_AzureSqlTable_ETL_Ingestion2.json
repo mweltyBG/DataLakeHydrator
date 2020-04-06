@@ -17,7 +17,7 @@
 				"precision": 10
 			},
 			{
-				"name": "DB2SchemaTable",
+				"name": "SourceSchemaTable",
 				"type": "varchar"
 			},
 			{
