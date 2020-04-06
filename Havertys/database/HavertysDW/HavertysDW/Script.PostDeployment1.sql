@@ -905,8 +905,8 @@ GO
 SET IDENTITY_INSERT [ETL].[MetadataIngestionList] OFF
 GO
 
-INSERT [ETL].[MetadataIngestionControlDateRanges] ([DB2TableID], [DB2SchemaTable], [DB2ControlTable], [DB2ControlTableStartDateColumn], [DB2ControlTableEndDateColumn], [ControlProcessNumber], [ControlStartDate], [ControlEndDate]) VALUES (50, N'ipcorpdta.tbdwwrt', N'ipcorpdta.tbdwslsctl', N'extracted_from', N'extracted_thru', 300, CAST(N'2020-03-14T14:57:43.753' AS DateTime), CAST(N'2020-03-21T14:57:43.753' AS DateTime))
+INSERT [ETL].[MetadataIngestionControlDateRanges] ([SourceTableID], [SourceSchemaTable], [SourceControlTable], [SourceControlTableStartDateColumn], [SourceControlTableEndDateColumn], [ControlProcessNumber], [ControlStartDate], [ControlEndDate]) VALUES (50, N'ipcorpdta.tbdwwrt', N'ipcorpdta.tbdwslsctl', N'extracted_from', N'extracted_thru', 300, CAST(N'2020-03-14T14:57:43.753' AS DateTime), CAST(N'2020-03-21T14:57:43.753' AS DateTime))
 GO
-INSERT [ETL].[MetadataIngestionControlDateRanges] ([DB2TableID], [DB2SchemaTable], [DB2ControlTable], [DB2ControlTableStartDateColumn], [DB2ControlTableEndDateColumn], [ControlProcessNumber], [ControlStartDate], [ControlEndDate]) VALUES (51, N'ipcorpdta.tbdwbld', N'ipcorpdta.tbdwslsctl', N'extracted_from', N'extracted_thru', 300, CAST(N'2020-03-14T14:57:43.750' AS DateTime), CAST(N'2020-03-21T14:57:43.750' AS DateTime))
+INSERT [ETL].[MetadataIngestionControlDateRanges] ([SourceTableID], [SourceSchemaTable], [SourceControlTable], [SourceControlTableStartDateColumn], [SourceControlTableEndDateColumn], [ControlProcessNumber], [ControlStartDate], [ControlEndDate]) VALUES (51, N'ipcorpdta.tbdwbld', N'ipcorpdta.tbdwslsctl', N'extracted_from', N'extracted_thru', 300, CAST(N'2020-03-14T14:57:43.750' AS DateTime), CAST(N'2020-03-21T14:57:43.750' AS DateTime))
 GO
 

@@ -12,24 +12,24 @@
 		"type": "AzureSqlTable",
 		"schema": [
 			{
-				"name": "DB2TableID",
+				"name": "SourceTableID",
 				"type": "int",
 				"precision": 10
 			},
 			{
-				"name": "DB2SchemaTable",
+				"name": "SourceSchemaTable",
 				"type": "varchar"
 			},
 			{
-				"name": "DB2ControlTable",
+				"name": "SourceControlTable",
 				"type": "varchar"
 			},
 			{
-				"name": "DB2ControlTableStartDateColumn",
+				"name": "SourceControlTableStartDateColumn",
 				"type": "varchar"
 			},
 			{
-				"name": "DB2ControlTableEndDateColumn",
+				"name": "SourceControlTableEndDateColumn",
 				"type": "varchar"
 			},
 			{
