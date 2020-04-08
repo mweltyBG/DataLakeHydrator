@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [ETL].[MetadataIngestionList] (
     [TableID]               INT            IDENTITY (1, 1) NOT NULL,
     [SourceSchemaTable]     VARCHAR (50)   NOT NULL,
-    [DataLakeSchemaTable]   VARCHAR (50)   NOT NULL,
+    [TargetSchemaTable]   VARCHAR (50)   NOT NULL,
     [PKColumnList]          VARCHAR (300)  NOT NULL,
     [FilterColumn]          VARCHAR (50)   NULL,
     [FilterColumnDataType]  VARCHAR (25)   NULL,

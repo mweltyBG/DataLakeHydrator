@@ -7,7 +7,7 @@ SELECT
 	JM.StartTime,
 	IL.[TableID], 
 	IL.[SourceSchemaTable], 
-	IL.[DataLakeSchemaTable],
+	IL.[TargetSchemaTable],
 	IL.[PKColumnList], 
 	IL.[FilterColumn], 
 	IL.[FilterColumnDataType],
