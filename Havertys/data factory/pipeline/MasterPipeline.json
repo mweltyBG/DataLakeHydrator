@@ -1,7 +1,7 @@
 {
 	"name": "MasterPipeline",
 	"properties": {
-		"description": "This pipeline is used to copy data from DB2 to Azure Data Lake for both Staging and Raw storage. Several stored procedures are called to update logging and return metadata for the data that needs to be copied.",
+		"description": "This pipeline is used to copy data from Source to Azure Data Lake for both Staging and Raw storage. Several stored procedures are called to update logging and return metadata for the data that needs to be copied.",
 		"activities": [
 			{
 				"name": "LookUp_MasterJobStart",
@@ -152,7 +152,7 @@
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [
 								{
-									"activity": "Execute_pl_DB2MetadataIngestion",
+									"activity": "Execute_pl_SourceMetadataIngestion",
 									"dependencyConditions": [
 										"Failed"
 									]
@@ -184,7 +184,7 @@
 							}
 						},
 						{
-							"name": "Execute_pl_DB2MetadataIngestion",
+							"name": "Execute_pl_SourceMetadataIngestion",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"userProperties": [],

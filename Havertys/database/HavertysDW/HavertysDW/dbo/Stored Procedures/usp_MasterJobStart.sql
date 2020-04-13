@@ -28,7 +28,7 @@ SELECT @MasterProcessNumber = MasterProcessNumber FROM [ETL].[JobMaster] WHERE [
 UPDATE [ETL].[JobMaster] SET ReStartTime = GETDATE(), [Status] = 'ReRunning' WHERE [Status]='Failure' AND JobConfiguration = @JobConfiguration
 END
 
---If the MasterProcessNumber is not null, we got the number from DB2 and need to start the process with the seeded number. 
+--If the MasterProcessNumber is not null, we got the number from Source and need to start the process with the seeded number. 
 ELSE IF @MasterProcessNumber IS NOT NULL
 BEGIN
 

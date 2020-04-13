@@ -643,7 +643,7 @@
 							"typeProperties": {
 								"source": {
 									"type": "AzureSqlSource",
-									"sqlReaderStoredProcedureName": "[dbo].[usp_MetadataListDB2Sql]",
+									"sqlReaderStoredProcedureName": "[dbo].[usp_MetadataListSourceSql]",
 									"storedProcedureParameters": {
 										"SourceSchemaTable": {
 											"type": "String",

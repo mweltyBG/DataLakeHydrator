@@ -138,6 +138,7 @@
     <Folder Include="dbo\Functions\" />
     <Folder Include="Purchasing\" />
     <Folder Include="Purchasing\Tables\" />
+    <Folder Include="ETL\Views" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="DW\Tables\Dim_SKU.sql">
@@ -435,16 +436,19 @@
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
     <Build Include="Security\Purchasing.sql" />
-    <Build Include="dbo\Functions\udf_GenerateDB2SQL.sql" />
+    <Build Include="dbo\Functions\udf_GenerateSourceSQL.sql" />
     <Build Include="dbo\Stored Procedures\usp_JobConfigurationMetadataList.sql" />
     <Build Include="dbo\Stored Procedures\usp_JobTableLogIngestionUpdate.sql" />
-    <Build Include="dbo\Stored Procedures\usp_MetadataListDB2Sql.sql" />
+    <Build Include="dbo\Stored Procedures\usp_MetadataListSourceSql.sql" />
     <Build Include="dbo\Stored Procedures\usp_MetadataListUpdate.sql" />
     <Build Include="ETL\Tables\BlobFileMetadataIngestionList.sql" />
     <Build Include="ETL\Tables\JobConfigurationType.sql" />
     <Build Include="ETL\Tables\MetadataIngestionControlDateRanges.sql" />
     <Build Include="ETL\Tables\MetadataIngestionList.sql" />
     <Build Include="Inventory\Tables\Fact_InventorySnapshot.sql" />
+    <Build Include="ETL\Tables\DataSystems.sql" />
+    <Build Include="ETL\Tables\IntegrationRuntimes.sql" />
+    <Build Include="ETL\Tables\IntegrationRuntimeDataSystem.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
