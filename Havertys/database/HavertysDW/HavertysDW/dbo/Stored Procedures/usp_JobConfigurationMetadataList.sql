@@ -14,7 +14,13 @@ SELECT
 	IL.[FilterColumnValue],
 	IL.[SelectQuery], 
 	IL.[DataLakeStagingFolder],
-	IL.[ServerName],
+	IL.[IntegrationRuntime],
+	'ds_'+SDS.SystemType+'_' +IL.IntegrationRuntime + '_' + CASE WHEN SDS.SystemType IN ('Azure','AzureSQL','SQLServer') THEN SDS.AuthenticationMethod ELSE SDS.SystemName END as [SourceDataset],
+	'ds_'+SDS.SystemType+'_' +IL.IntegrationRuntime + '_' + CASE WHEN TDS.SystemType IN ('Azure','AzureSQL','SQLServer') THEN TDS.AuthenticationMethod ELSE TDS.SystemName END as [TargetDataset],
+	'kv-'+SDS.SystemName+'-connstr' as [SourceConnectionString],
+	'kv-'+TDS.SystemName+'-connstr' as [TargetConnectionString],
+	'kv-'+SDS.SystemName+'-passwd' as [SourcePassword],
+	'kv-'+TDS.SystemName+'-passwd' as [TargetPassword],
 	IL.[SqlOverrideQuery],
 	IL.[LoadCurated],
 	CDR.[SourceControlTable],
@@ -34,18 +40,27 @@ SELECT
 	as ControlTableSql
 
 FROM
-[ETL].[JobMaster] JM
-INNER JOIN [ETL].[JobConfiguration] JCon ON JCon.TableControlType='DB2' 
-	AND JM.JobConfiguration = JCon.JobConfiguration 
-	AND JM.Status IN ('Running','ReRunning') 
-	AND JM.MasterProcessNumber = @MasterProcessNumber 
-INNER JOIN [ETL].[MetadataIngestionList] IL ON JCon.TableID = IL.TableID AND JCon.ExecuteFlag = CONVERT(bit, 1) AND IL.[Disabled] = CONVERT(bit,  0)
-LEFT OUTER JOIN [ETL].[MetadataIngestionControlDateRanges] CDR ON IL.TableID = CDR.SourceTableID
+	[ETL].[JobMaster] AS JM
+	JOIN [ETL].[JobConfiguration] as JCon 
+		ON JM.JobConfiguration = JCon.JobConfiguration 
+		AND JM.Status IN ('Running','ReRunning') 
+		AND JM.MasterProcessNumber = @MasterProcessNumber 
+	JOIN [ETL].[MetadataIngestionList] AS IL 
+		ON JCon.TableID = IL.TableID
+		AND JCon.ExecuteFlag = CONVERT(bit, 1) 
+		AND IL.[Disabled] = CONVERT(bit,  0)
+	JOIN [ETL].[DataSystems] as SDS
+		On IL.SourceSystem = SDS.SystemName
+	JOIN [ETL].[DataSystems] as TDS
+		on IL.TargetSystem = TDS.SystemName
+	LEFT JOIN [ETL].[MetadataIngestionControlDateRanges] AS CDR 
+		ON IL.TableID = CDR.SourceTableID
 WHERE 
-NOT EXISTS (SELECT 1 
-			FROM [ETL].[JobTableLog] 
-			WHERE MasterProcessNumber = JM.MasterProcessNumber 
-			 	AND TableControlType='DB2' 
-				AND TableID = JCon.TableID
-				AND JobConfiguration = JM.JobConfiguration 
-				AND [Status] IN ('Running','ReRunning','Success')) -- This table must not have an existing successful or running log for this run 
+	NOT EXISTS (
+		SELECT 1 
+		FROM [ETL].[JobTableLog] 
+		WHERE MasterProcessNumber = JM.MasterProcessNumber 
+			AND TableID = JCon.TableID
+			AND JobConfiguration = JM.JobConfiguration 
+			AND [Status] IN ('Running','ReRunning','Success')
+		) -- This table must not have an existing successful or running log for this run 

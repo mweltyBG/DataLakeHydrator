@@ -448,7 +448,6 @@
     <Build Include="Inventory\Tables\Fact_InventorySnapshot.sql" />
     <Build Include="ETL\Tables\DataSystems.sql" />
     <Build Include="ETL\Tables\IntegrationRuntimes.sql" />
-    <Build Include="ETL\Tables\IntegrationRuntimeDataSystem.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

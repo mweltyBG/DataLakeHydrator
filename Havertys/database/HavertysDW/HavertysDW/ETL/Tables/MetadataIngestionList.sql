@@ -14,6 +14,9 @@
     [SqlOverrideQuery]      VARCHAR (MAX)  NULL,
     [LoadCurated]           BIT            NOT NULL,
     [Disabled]              BIT            NOT NULL,
-    CONSTRAINT [PK_ETL_MetadataIngestionList] PRIMARY KEY CLUSTERED ([TableID] ASC)
+    CONSTRAINT [PK_ETL_MetadataIngestionList] PRIMARY KEY CLUSTERED ([TableID] ASC),
+    CONSTRAINT [FK_ETL_MetadataIngestionList_SourceSystem] FOREIGN KEY ([SourceSystem]) REFERENCES [ETL].[DataSystems]([SystemName]),
+    CONSTRAINT [FK_ETL_MetadataIngestionList_TargetSystem] FOREIGN KEY ([TargetSystem]) REFERENCES [ETL].[DataSystems]([SystemName]),
+    CONSTRAINT [FK_ETL_MetadataIngestionList_IntegrationRuntime] FOREIGN KEY ([IntegrationRuntime]) REFERENCES [ETL].[IntegrationRuntimes]([IntegrationRuntime])
 );
 
