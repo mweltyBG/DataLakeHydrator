@@ -1,5 +1,5 @@
 ﻿CREATE SCHEMA [Purchasing]
-    AUTHORIZATION [ETL];
+    AUTHORIZATION [dbo];
 
 
 

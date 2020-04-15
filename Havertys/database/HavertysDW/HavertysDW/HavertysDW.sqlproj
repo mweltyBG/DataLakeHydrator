@@ -127,52 +127,12 @@
     <Folder Include="Security\" />
     <Folder Include="dbo\" />
     <Folder Include="dbo\Stored Procedures\" />
-    <Folder Include="Sales\" />
-    <Folder Include="Sales\Tables\" />
     <Folder Include="dbo\Tables\" />
-    <Folder Include="Updates\" />
-    <Folder Include="Updates\Tables\" />
     <Folder Include="dbo\Views\" />
-    <Folder Include="Inventory\" />
-    <Folder Include="Inventory\Tables\" />
     <Folder Include="dbo\Functions\" />
-    <Folder Include="Purchasing\" />
-    <Folder Include="Purchasing\Tables\" />
     <Folder Include="ETL\Views" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="DW\Tables\Dim_SKU.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="DW\Tables\Dim_SKU_Materials.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="DW\Tables\Dim_SKU_CommonColor.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="DW\Tables\Dim_SKU_CommonFinish.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="DW\Tables\Dim_SKU_SpecialOrderAttributes.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="DW\Tables\Dim_SKU_SpecialOrderAttributesKey.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="DW\Tables\Dim_Customer.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="DW\Tables\Dim_Date.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
     <Build Include="ETL\Tables\JobConfiguration.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
@@ -182,10 +142,6 @@
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
     <Build Include="ETL\Tables\JobTableLog.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="DW\Tables\Dim_Time.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
@@ -224,91 +180,7 @@
     <Build Include="Security\DW.sql" />
     <Build Include="Security\ETL.sql" />
     <Build Include="Security\Sales.sql" />
-    <Build Include="Sales\Tables\Fact_WrittenSales.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="Sales\Tables\Fact_Traffic.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="Sales\Tables\Fact_SKUPrice.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="Sales\Tables\Fact_SKUCost.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="Sales\Tables\Fact_SalesBudget.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="Sales\Tables\Fact_DeliveredSales.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="DW\Tables\Dim_Vendor.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="DW\Tables\Dim_Team.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="DW\Tables\Dim_OverrideReason.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="DW\Tables\Dim_MerchandisingPromotion.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="DW\Tables\Dim_Location.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="DW\Tables\Dim_Factory.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="DW\Tables\Dim_Employee.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="DW\Tables\Dim_CreditPromotion.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="DW\Tables\Fact_SpecialOrderAttributesKeyValuesBridge.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="DW\Tables\Fact_SalesTeamBridge.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="DW\Tables\Fact_MaterialsBridge.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="DW\Tables\Fact_DesignerTeamBridge.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="DW\Tables\Fact_CommonFinishBridge.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="DW\Tables\Fact_CommonColorBridge.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
     <Build Include="ETL\Tables\JobParallelism.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="Updates\Tables\Dim_SKU_Update.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
@@ -316,10 +188,6 @@
     <Build Include="Security\Updates.sql" />
     <Build Include="Security\test.sql" />
     <Build Include="dbo\Views\Compressed_Tables.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="Updates\Tables\Dim_Customer_Update.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
@@ -335,26 +203,6 @@
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
     <Build Include="dbo\Stored Procedures\usp_Load_Dim_Customer.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="Updates\Tables\Fact_SalesBudget_Update.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="Sales\Tables\Fact_CompSalesMatrix.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="Updates\Tables\Fact_Traffic_Update.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="Updates\Tables\Dim_Team_Update.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="Updates\Tables\Dim_Employee_Update.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
@@ -403,34 +251,8 @@
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
     <Build Include="Security\Inventory_2.sql" />
-    <Build Include="DW\Tables\Dim_DeliveryArea.sql" />
-    <Build Include="DW\Tables\Dim_ShippingOrigin.sql" />
     <Build Include="dbo\Stored Procedures\usp_JobConfigurationBlobMetadataList.sql" />
     <Build Include="dbo\Functions\udf_GetETLConfiguration.sql" />
-    <Build Include="DW\Tables\Dim_SKU_History.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="Purchasing\Tables\Fact_IntracompanySalesTemporalSnapshots.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="Purchasing\Tables\Fact_ShipmentsBridge.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="Purchasing\Tables\Fact_ShipmentsTemporalSnapshots.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="Purchasing\Tables\Fact_DockingAppointmentTemporalSnapshots.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="Purchasing\Tables\Fact_PurchaseOrderTemporalSnapshots.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
     <Build Include="dbo\Functions\udf_LastYear_SameDOW.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
@@ -445,7 +267,6 @@
     <Build Include="ETL\Tables\JobConfigurationType.sql" />
     <Build Include="ETL\Tables\MetadataIngestionControlDateRanges.sql" />
     <Build Include="ETL\Tables\MetadataIngestionList.sql" />
-    <Build Include="Inventory\Tables\Fact_InventorySnapshot.sql" />
     <Build Include="ETL\Tables\DataSystems.sql" />
     <Build Include="ETL\Tables\IntegrationRuntimes.sql" />
   </ItemGroup>

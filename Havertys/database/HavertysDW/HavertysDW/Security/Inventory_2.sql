@@ -1,5 +1,5 @@
 ﻿CREATE SCHEMA [Inventory]
-    AUTHORIZATION [ETL];
+    AUTHORIZATION [dbo];
 
 
 

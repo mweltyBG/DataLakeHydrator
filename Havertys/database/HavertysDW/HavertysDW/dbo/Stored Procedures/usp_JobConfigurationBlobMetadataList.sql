@@ -12,8 +12,8 @@ SELECT
 	BIL.[DataLakeStagingFolder]
 FROM
 [ETL].[JobMaster] JM
-INNER JOIN [ETL].[JobConfiguration] JCon ON JCon.TableControlType='Blob' 
-	AND JM.JobConfiguration = JCon.JobConfiguration 
+INNER JOIN [ETL].[JobConfiguration] JCon ON /*JCon.TableControlType='Blob' 
+	AND*/ JM.JobConfiguration = JCon.JobConfiguration 
 	AND JM.Status IN ('Running','ReRunning') 
 	AND JM.MasterProcessNumber = @MasterProcessNumber
 INNER JOIN [ETL].[BlobFileMetadataIngestionList] BIL ON JCon.TableID = BIL.BlobFileID AND JCon.ExecuteFlag = CONVERT(bit, 1)
