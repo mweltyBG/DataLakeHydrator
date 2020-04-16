@@ -1,11 +1,11 @@
 {
-	"name": "ls_KV_KV21",
+	"name": "ls_keyvault",
 	"properties": {
 		"description": "This is a linked service to our Key Vault service",
 		"annotations": [],
 		"type": "AzureKeyVault",
 		"typeProperties": {
-			"baseUrl": "https://kv-mdp-demo.vault.azure.net/"
+			"baseUrl": "https://bgkeyvaultdev.vault.azure.net/"
 		}
 	},
 	"type": "Microsoft.DataFactory/factories/linkedservices"
