@@ -2,7 +2,7 @@
 	"name": "ds_ADLSG2parquet_DataLakeIngestionNamedFile",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "ls_ADLSGen2_dataanalyticsadls21",
+			"referenceName": "ls_adlsv2_autoresolveintegrationruntime_datalake",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
