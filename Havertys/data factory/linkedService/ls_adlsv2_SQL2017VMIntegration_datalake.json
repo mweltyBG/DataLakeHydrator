@@ -1,5 +1,5 @@
 {
-	"name": "ls_adlsv2_autoresolveintegrationruntime_datalake",
+	"name": "ls_adlsv2_SQL2017VMIntegration_datalake",
 	"type": "Microsoft.DataFactory/factories/linkedservices",
 	"properties": {
 		"description": "connect to ADLS Gen 2 via key vault using storage key secret",
@@ -7,8 +7,8 @@
 		"type": "AzureBlobFS",
 		"typeProperties": {
 			"url": "https://scardellaadls.dfs.core.windows.net",
-			"accountKey":{
-				"type":"AzureKeyVaultSecret",
+			"accountKey": {
+				"type": "AzureKeyVaultSecret",
 				"store": {
 					"referenceName": "ls_keyvault",
 					"type": "LinkedServiceReference"
@@ -16,9 +16,9 @@
 				"secretName": "kv-datalake-key"
 			}
 		},
-        "connectVia": {
-            "referenceName": "SQL2017VMIntegration",
-            "type": "IntegrationRuntimeReference"
-        }
+		"connectVia": {
+			"referenceName": "SQL2017VMIntegration",
+			"type": "IntegrationRuntimeReference"
+		}
 	}
 }
