@@ -1,0 +1,22 @@
+{
+    "name": "ls_sqlserver_SQL2017VMIntegration_sql",
+    "type": "Microsoft.DataFactory/factories/linkedservices",
+    "properties": {
+        "annotations": [],
+        "type": "SqlServer",
+        "typeProperties": {
+            "connectionString": {
+                "type": "AzureKeyVaultSecret",
+                "store": {
+                    "referenceName": "ls_keyvault",
+                    "type": "LinkedServiceReference"
+                },
+                "secretName": "kv-SQLServer2017-connstr"
+            }
+        },
+        "connectVia": {
+            "referenceName": "SQL2017VMIntegration",
+            "type": "IntegrationRuntimeReference"
+        }
+    }
+}
