@@ -2,7 +2,7 @@
 	"name": "ds_AzureSqlTable_ETL_Ingestion2",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "ls_sourcesystem",
+			"referenceName": "ls_framework",
 			"type": "LinkedServiceReference"
 		},
 		"folder": {
