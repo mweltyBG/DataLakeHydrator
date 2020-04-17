@@ -1,22 +1,31 @@
 {
-    "name": "ls_sqlserver_SQL2017VMIntegration_sql",
-    "type": "Microsoft.DataFactory/factories/linkedservices",
-    "properties": {
-        "annotations": [],
-        "type": "SqlServer",
-        "typeProperties": {
-            "connectionString": {
-                "type": "AzureKeyVaultSecret",
-                "store": {
-                    "referenceName": "ls_keyvault",
-                    "type": "LinkedServiceReference"
-                },
-                "secretName": "kv-SQLServer2017-connstr"
-            }
-        },
-        "connectVia": {
-            "referenceName": "SQL2017VMIntegration",
-            "type": "IntegrationRuntimeReference"
-        }
-    }
+	"name": "ls_sqlserver_SQL2017VMIntegration_sql",
+	"properties": {
+		"parameters": {
+			"DataStoreName": {
+				"type": "string",
+				"defaultValue": "SQLServer2017"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_keyvault",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": {
+					"value": "@concat('kv-',linkedService().DataStoreName,'-connstr')",
+					"type": "Expression"
+				}
+			}
+		},
+		"connectVia": {
+			"referenceName": "SQL2017VMIntegration",
+			"type": "IntegrationRuntimeReference"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
 }
