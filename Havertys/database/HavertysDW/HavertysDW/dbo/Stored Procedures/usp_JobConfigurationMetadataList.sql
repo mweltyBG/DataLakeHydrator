@@ -19,8 +19,6 @@ SELECT
 	'ds_'+SDS.SystemType+'_' +IL.IntegrationRuntime + '_' + CASE WHEN TDS.SystemType IN ('Azure','AzureSQL','SQLServer') THEN TDS.AuthenticationMethod ELSE TDS.SystemName END as [TargetDataset],
 	'kv-'+SDS.SystemName+'-connstr' as [SourceConnectionString],
 	'kv-'+TDS.SystemName+'-connstr' as [TargetConnectionString],
-	'kv-'+SDS.SystemName+'-passwd' as [SourcePassword],
-	'kv-'+TDS.SystemName+'-passwd' as [TargetPassword],
 	IL.[SqlOverrideQuery],
 	IL.[LoadCurated],
 	CDR.[SourceControlTable],

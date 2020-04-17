@@ -306,7 +306,7 @@
 							"type": "Delete",
 							"dependsOn": [
 								{
-									"activity": "LookUp_DB2SelectSql",
+									"activity": "Lookup_SourceSelectSQL",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -414,7 +414,7 @@
 													"source": {
 														"type": "AzureSqlSource",
 														"sqlReaderQuery": {
-															"value": "@activity('LookUp_DB2SelectSql').output.firstRow.Query",
+															"value": "@activity('Lookup_SourceSelectSQL').output.firstRow.Query",
 															"type": "Expression"
 														},
 														"queryTimeout": "02:00:00"
@@ -493,7 +493,7 @@
 														},
 														"SqlStatementUsed": {
 															"value": {
-																"value": "@activity('LookUp_DB2SelectSql').output.firstRow.Query",
+																"value": "@activity('Lookup_SourceSelectSQL').output.firstRow.Query",
 																"type": "Expression"
 															},
 															"type": "String"
@@ -526,7 +526,7 @@
 											"source": {
 												"type": "AzureSqlSource",
 												"sqlReaderQuery": {
-													"value": "@activity('LookUp_DB2SelectSql').output.firstRow.Query",
+													"value": "@activity('Lookup_SourceSelectSQL').output.firstRow.Query",
 													"type": "Expression"
 												},
 												"queryTimeout": "02:00:00"
@@ -605,7 +605,7 @@
 												},
 												"SqlStatementUsed": {
 													"value": {
-														"value": "@activity('LookUp_DB2SelectSql').output.firstRow.Query",
+														"value": "@activity('Lookup_SourceSelectSQL').output.firstRow.Query",
 														"type": "Expression"
 													},
 													"type": "String"
@@ -621,8 +621,8 @@
 							}
 						},
 						{
-							"name": "LookUp_DB2SelectSql",
-							"description": "Using a stored procedure, outputs correct SQL to use to select rows from DB2 ",
+							"name": "Lookup_SourceSelectSQL",
+							"description": "Using a stored procedure, outputs correct SQL to use to select rows from the source database.",
 							"type": "Lookup",
 							"dependsOn": [
 								{
