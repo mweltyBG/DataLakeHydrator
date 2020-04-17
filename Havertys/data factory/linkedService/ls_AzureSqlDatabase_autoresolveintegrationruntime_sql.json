@@ -1,14 +1,14 @@
 {
-	"name": "ls_sqlserver_SQL2017VMIntegration_sql",
+	"name": "ls_AzureSqlDatabase_autoresolveintegrationruntime_sql",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
 	"properties": {
 		"parameters": {
 			"DataStoreName": {
 				"type": "string",
-				"defaultValue": "SampleSource"
+				"defaultValue": "adflanding"
 			}
-		},
-		"annotations": [],
-		"type": "SqlServer",
+		},"annotations": [],
+		"type": "AzureSqlDatabase",
 		"typeProperties": {
 			"connectionString": {
 				"type": "AzureKeyVaultSecret",
@@ -21,11 +21,6 @@
 					"type": "Expression"
 				}
 			}
-		},
-		"connectVia": {
-			"referenceName": "SQL2017VMIntegration",
-			"type": "IntegrationRuntimeReference"
 		}
-	},
-	"type": "Microsoft.DataFactory/factories/linkedservices"
+	}
 }
