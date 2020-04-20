@@ -1,0 +1,37 @@
+The intent of this framework is to be simple and easy to get started for simple projects, while still having enough options and extensibility to grow for more complex projects. To get started you truly only need to populate one table, which is "etl.Task". All other tables provide additional optional functionality.
+
+The "etl.Task" table contains a row for each table you want to import. The minimum fields you should enter are (more or less):
+
+SourceName: the name you've decided to give the source system
+SourceType: SQL (currently only on-prem SQL supported, but I think we can pretty rapidly ramp up support for other database types). this is supposed to be an enum on those different supported types
+SourceTableName: name of the table you want to import
+TargetDataLakeContainer: the name of the storage account container you want to save the parquet file to
+TargetDataLakeFolder: destination folder
+TargetDataLakeFileName: this is optional. if you don't supply, then the ETL will use the name of the table as the root of the file name.
+
+All the other columns in that table add additional functionality, such as custom queries, incremental data-loading functionality, and the concept of "advanced" tasks. Advanced tasks allow you to more heavily customize the ETL while still retaining some roots in this "common" framework. That's all I'll say here since this is supposed to be brief.
+
+Jobs:
+
+Jobs are an orchestration concept and are optional within the framework. Jobs are simply a group of one or more tasks. They exist because most projects eventually grow to need something like them. They are made optional for the sake of simplicity. In truth, this is a baked-in, implicit job which all tasks belong to. This is job is named "default". You don't need to set this job up in the "etl.Job" table. Think of it as an virtual or imaginary job. As a sort of reference to imaginary numbers, it has an imaginary JobKey of -1. Rather than simple this might all sound confusing, but what it means is that you simply add a handful of rows to the "etl.Task" table and then run the "default" job, and all your tasks will execute. Need to only execute a subset of your tasks? Congratulations, you have now grown to the point where setting up and executing different jobs will benefit you.
+
+Operation overview:
+
+A job, whether the default "virtual" job or an explicit job in the etl.Job table, is executed via the "pl_job_master" pipeline. This pipeline accepts a single parameter, which is the job name. Leave it blank to run the default job. The pipeline checks the etl.JobAudit table. This contains one record per each job execution. For restartability purposes, if the last execution of the job failed, then the pipeline will try to adopt the failed "JobAuditKey" and try again. Otherwise, if the prior run was successful, then the pipeline simply logs a new row to the table and grabs the newly-generated "JobAuditKey". It also assembles a list of all the tasks that need to execute as part of this job. It does this by joining to the etl.Task table via the etl.TaskJobBridge table. It finds all the TaskKeys that need to be executed and then seeds one row per each task in the etl.TaskAudit table. The etl.TaskAudit table retains a reference to the JobAudit table.
+
+The etl.TaskAudit table was pre-seeded with tasks during the "pl_job_master" pipeline. The same pipeline iterates over each row. The "pl_taskaudit_launcher" pipeline is executed for each row. The pipeline does some basic logging but ultimately passes the work onto another pipeline, "pl_standard_ingest". 
+
+The "pl_standard_ingest" pipeline takes a particular "TaskAuditKey" value as a parameter. It joins this back to the etl.Task table to get the info it needs to copy the data from the source system into a parquet file within the data lake. It adds the "TaskAuditKey" value to the parquet filename for traceability.
+
+
+
+Table descriptions:
+
+etl.Job: one row per job
+etl.JobAudit: history of each job execution
+etl.KeyValueConfig: a two-column key-value config table for various system-wide settings
+etl.Task: each discrete table/query/etc that needs to be ingested
+etl.TaskAudit: history of ingestion detail for a particular task during a particular job execution. also serves as the "worklist" for the ETL to follow during a job execution
+etl.TaskJobBridge: simple bridge table that maps tasks to jobs
+etl.TaskLimitAudit: audit table detailing history of each time limits are updated on an incremental task
+ 
