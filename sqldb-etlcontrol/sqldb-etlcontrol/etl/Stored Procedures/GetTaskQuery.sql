@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE [etl].[GetTaskQuery]
+CREATE OR ALTER PROCEDURE [etl].[GetTaskQuery]
 (@TaskKey INT,
  @TaskAuditKey INT,
  @ETLExtractDatetime DATETIME = NULL
@@ -143,8 +143,10 @@ DECLARE @InsertDateTime DATETIME = '1900-01-01'
 			-- WHERE clause and incremental functionality
 
 			IF @IsIncrementalFlag = 0
+			BEGIN
 				IF @SourceWhereClause != ''
 					SET @Query = @Query + @SourceWhereClause
+			END
 			ELSE
 			BEGIN
 				-- incremental functionality:
