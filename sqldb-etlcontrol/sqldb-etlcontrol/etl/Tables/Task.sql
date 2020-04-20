@@ -29,6 +29,8 @@
     [Offset]                    NVARCHAR (200)  NULL,
     [OffsetUnit]                NVARCHAR (200)  NULL,
     [TimeZoneName]              NVARCHAR (200)  NULL,
+    [DataIntegrationUnits]      NVARCHAR(200) NULL DEFAULT(N'Auto'),
+    [DegreeOfParallelism]       INT NULL DEFAULT(1),
     [DisableLimitUpdate]        BIT             DEFAULT ((0)) NOT NULL,
     [DisableAction]             BIT             DEFAULT ((0)) NULL,
     CONSTRAINT [PK_etl_Task] PRIMARY KEY CLUSTERED ([TaskKey] ASC)
