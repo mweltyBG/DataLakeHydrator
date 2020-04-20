@@ -145,7 +145,7 @@
 									},
 									"inputs": [
 										{
-											"referenceName": "ds_sqldb_david_dynamic",
+											"referenceName": "ds_sqldb_wdrsreporting_dynamic",
 											"type": "DatasetReference"
 										}
 									],
