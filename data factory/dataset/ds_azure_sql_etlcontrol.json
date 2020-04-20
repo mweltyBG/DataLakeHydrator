@@ -1,0 +1,13 @@
+{
+	"name": "ds_azure_sql_etlcontrol",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_azure_sqldb_etlcontrol",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
