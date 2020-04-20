@@ -1,27 +1,27 @@
 {
-    "name": "ds_sqlserver_SQL2017VMIntegrationruntime_sql",
-    "properties": {
-        "linkedServiceName": {
-            "referenceName": "ls_SQL2017VMIntegrationruntime_sql",
-            "type": "LinkedServiceReference",
-            "parameters": {
-                "SecretName": {
-                    "value": "@dataset().SecretName",
-                    "type": "Expression"
-                }
-            }
-        },
-        "folder": {
+	"name": "ds_sqlserver_SQL2017VMIntegrationruntime_sql",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sqlserver_SQL2017VMIntegration_sql",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"SecretName": {
+					"value": "@dataset().SecretName",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"SecretName": {
+				"type": "string",
+				"defaultValue": "kv-bimlexample-connstr"
+			}
+		},
+		"folder": {
 			"name": "DataSystems"
-        },
-        "parameters": {
-            "SecretName": {
-                "type": "string",
-                "defaultValue": "kv-bimlexample-connstr"
-            }
-        },
-        "annotations": [],
-        "type": "SqlServerTable",
-        "schema": []
-    }
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": []
+	}
 }

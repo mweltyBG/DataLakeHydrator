@@ -435,7 +435,7 @@
 													{
 														"referenceName": "ds_sqlserver_SQL2017VMIntegrationruntime_sql",
 														"type": "DatasetReference",
-														"parameters":{
+														"parameters": {
 															"SecretName": {
 																"value": "@item().SourceConnectionString",
 																"type": "Expression"
@@ -493,6 +493,124 @@
 														"RowsCopied": {
 															"value": {
 																"value": "@activity('Copy_1').output.rowsCopied",
+																"type": "Expression"
+															},
+															"type": "Int32"
+														},
+														"SqlStatementUsed": {
+															"value": {
+																"value": "@activity('Lookup_SourceSelectSQL').output.firstRow.Query",
+																"type": "Expression"
+															},
+															"type": "String"
+														}
+													}
+												},
+												"linkedServiceName": {
+													"referenceName": "ls_framework",
+													"type": "LinkedServiceReference"
+												}
+											}
+										]
+									},
+									{
+										"value": "ds_AzureSqlDatabase_autoresolveintegrationruntime_sql -> ds_adlsv2_autoresolveintegrationruntime_datalake_file_parquet",
+										"activities": [
+											{
+												"name": "Copy_2",
+												"type": "Copy",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "AzureSqlSource",
+														"sqlReaderQuery": {
+															"value": "@activity('Lookup_SourceSelectSQL').output.firstRow.Query",
+															"type": "Expression"
+														},
+														"queryTimeout": "02:00:00"
+													},
+													"sink": {
+														"type": "ParquetSink",
+														"storeSettings": {
+															"type": "AzureBlobFSWriteSettings"
+														}
+													},
+													"enableStaging": false,
+													"parallelCopies": {
+														"value": "@pipeline().parameters.JobParallelism",
+														"type": "Expression"
+													}
+												},
+												"inputs": [
+													{
+														"referenceName": "ds_AzureSqlDatabase_autoresolveintegrationruntime_sql",
+														"type": "DatasetReference",
+														"parameters": {
+															"SecretName": {
+																"value": "@item().TargetConnectionString",
+																"type": "Expression"
+															}
+														}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "ds_adlsv2_autoresolveintegrationruntime_datalake_file_parquet",
+														"type": "DatasetReference",
+														"parameters": {
+															"FolderPath": {
+																"value": "@concat( item().DataLakeStagingFolder, '/', replace(item().TargetSchemaTable, '.', '_') )",
+																"type": "Expression"
+															},
+															"FileName": {
+																"value": "@concat(item().TargetSchemaTable,'_',string(pipeline().parameters.MasterProcessNumber),'.parquet')",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											},
+											{
+												"name": "SP_JobTableLogUpdate_2",
+												"description": "This stored procedure updates the JobTableLog with the SQL statement used and the number of rows read after successful execution of the copy from DB2 to staging",
+												"type": "SqlServerStoredProcedure",
+												"dependsOn": [
+													{
+														"activity": "Copy_2",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"storedProcedureName": "[dbo].[usp_JobTableLogIngestionUpdate]",
+													"storedProcedureParameters": {
+														"JobTableLogID": {
+															"value": {
+																"value": "@{activity('LookUp_JobTableLogStart').output.value[0].JobTableLogID}",
+																"type": "Expression"
+															},
+															"type": "Int32"
+														},
+														"RowsCopied": {
+															"value": {
+																"value": "@activity('Copy_2').output.rowsCopied",
 																"type": "Expression"
 															},
 															"type": "Int32"
