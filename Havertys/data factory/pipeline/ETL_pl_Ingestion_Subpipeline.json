@@ -4,7 +4,7 @@
 		"activities": [
 			{
 				"name": "LookUp_JobConfigurationMetadataList",
-				"description": "This LookUp calls a stored procedure and returns the metadata for the DB2 tables that need to be copied to Azure Data Lake",
+				"description": "This LookUp calls a stored procedure and returns the metadata for the source tables that need to be copied to Azure Data Lake",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -30,7 +30,7 @@
 						}
 					},
 					"dataset": {
-						"referenceName": "ds_AzureSqlTable_ETL_MetadataIngestionList",
+						"referenceName": "ds_framework",
 						"type": "DatasetReference"
 					},
 					"firstRowOnly": false
@@ -85,7 +85,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"source": {
-									"type": "ParquetSource",
+									"type": "BinarySource",
 									"storeSettings": {
 										"type": "AzureBlobFSReadSettings",
 										"recursive": true,
@@ -94,7 +94,7 @@
 									}
 								},
 								"sink": {
-									"type": "ParquetSink",
+									"type": "BinarySink",
 									"storeSettings": {
 										"type": "AzureBlobFSWriteSettings"
 									}
@@ -107,7 +107,7 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "ds_ADLSG2parquet_DataLakeIngestionDir",
+									"referenceName": "ds_adlsv2_autoresolveintegrationruntime_datalake_directory_binary",
 									"type": "DatasetReference",
 									"parameters": {
 										"FolderPath": {
@@ -119,7 +119,7 @@
 							],
 							"outputs": [
 								{
-									"referenceName": "ds_ADLSG2parquet_DataLakeIngestionDir",
+									"referenceName": "ds_adlsv2_autoresolveintegrationruntime_datalake_directory_binary",
 									"type": "DatasetReference",
 									"parameters": {
 										"FolderPath": {
@@ -183,7 +183,7 @@
 									}
 								},
 								"dataset": {
-									"referenceName": "ds_AzureSqlTable_ETL_Master",
+									"referenceName": "ds_framework",
 									"type": "DatasetReference"
 								},
 								"firstRowOnly": false
@@ -222,7 +222,7 @@
 								}
 							},
 							"linkedServiceName": {
-								"referenceName": "ls_AzureSqlDatabase_autoresolveintegrationruntime_sql",
+								"referenceName": "ls_framework",
 								"type": "LinkedServiceReference"
 							}
 						},
@@ -259,7 +259,7 @@
 								}
 							},
 							"linkedServiceName": {
-								"referenceName": "ls_AzureSqlDatabase_autoresolveintegrationruntime_sql",
+								"referenceName": "ls_framework",
 								"type": "LinkedServiceReference"
 							}
 						},
@@ -296,7 +296,7 @@
 								}
 							},
 							"linkedServiceName": {
-								"referenceName": "ls_AzureSqlDatabase_autoresolveintegrationruntime_sql",
+								"referenceName": "ls_framework",
 								"type": "LinkedServiceReference"
 							}
 						},
@@ -322,7 +322,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"dataset": {
-									"referenceName": "ds_ADLSG2parquet_DataLakeIngestionDir",
+									"referenceName": "ds_adlsv2_autoresolveintegrationruntime_datalake_directory_binary",
 									"type": "DatasetReference",
 									"parameters": {
 										"FolderPath": {
@@ -360,7 +360,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"dataset": {
-									"referenceName": "ds_ADLSG2parquet_DataLakeIngestionDir",
+									"referenceName": "ds_adlsv2_autoresolveintegrationruntime_datalake_directory_binary",
 									"type": "DatasetReference",
 									"parameters": {
 										"FolderPath": {
@@ -390,16 +390,16 @@
 							"userProperties": [],
 							"typeProperties": {
 								"on": {
-									"value": "@toUpper(item().ServerName)",
+									"value": "@toUpper(concat(item().SourceDataset,' -> ',item().TargetDataset))",
 									"type": "Expression"
 								},
 								"cases": [
 									{
-										"value": "PC03002",
+										"value": "ds_sqlserver_SQL2017VMIntegrationruntime_sql -> ds_adlsv2_SQL2017VMIntegration_datalake",
 										"activities": [
 											{
-												"name": "Copy_DB2_ADLStaging_3002",
-												"description": "A query returns applicable data for each from DB2 which is then copied into Azure Data Lake in a staging folder. File path and name are dynamically derived from the Metadata lookup.",
+												"name": "Copy_1",
+												"description": "A query returns applicable data for each from the source system which is then copied into the target system in a staging folder. File path and name are dynamically derived from the Metadata lookup.",
 												"type": "Copy",
 												"dependsOn": [],
 												"policy": {
@@ -412,7 +412,7 @@
 												"userProperties": [],
 												"typeProperties": {
 													"source": {
-														"type": "AzureSqlSource",
+														"type": "SqlSource",
 														"sqlReaderQuery": {
 															"value": "@activity('Lookup_SourceSelectSQL').output.firstRow.Query",
 															"type": "Expression"
@@ -433,13 +433,19 @@
 												},
 												"inputs": [
 													{
-														"referenceName": "ds_AzureSqlTable_ETL_Ingestion2",
-														"type": "DatasetReference"
+														"referenceName": "ds_sqlserver_SQL2017VMIntegrationruntime_sql",
+														"type": "DatasetReference",
+														"parameters":{
+															"SecretName": {
+																"value": "@item().SourceConnectionString",
+																"type": "Expression"
+															}
+														}
 													}
 												],
 												"outputs": [
 													{
-														"referenceName": "ds_ADLSG2parquet_DataLakeIngestionNamedFile",
+														"referenceName": "ds_adlsv2_SQL2017VMIntegration_datalake_file_parquet",
 														"type": "DatasetReference",
 														"parameters": {
 															"FolderPath": {
@@ -455,12 +461,12 @@
 												]
 											},
 											{
-												"name": "SP_JobTableLogUpdate_3002",
+												"name": "SP_JobTableLogUpdate_1",
 												"description": "This stored procedure updates the JobTableLog with the SQL statement used and the number of rows read after successful execution of the copy from DB2 to staging",
 												"type": "SqlServerStoredProcedure",
 												"dependsOn": [
 													{
-														"activity": "Copy_DB2_ADLStaging_3002",
+														"activity": "Copy_1",
 														"dependencyConditions": [
 															"Succeeded"
 														]
@@ -486,7 +492,7 @@
 														},
 														"RowsCopied": {
 															"value": {
-																"value": "@activity('Copy_DB2_ADLStaging_3002').output.rowsCopied",
+																"value": "@activity('Copy_1').output.rowsCopied",
 																"type": "Expression"
 															},
 															"type": "Int32"
@@ -501,121 +507,11 @@
 													}
 												},
 												"linkedServiceName": {
-													"referenceName": "ls_AzureSqlDatabase_autoresolveintegrationruntime_sql",
+													"referenceName": "ls_framework",
 													"type": "LinkedServiceReference"
 												}
 											}
 										]
-									}
-								],
-								"defaultActivities": [
-									{
-										"name": "Copy_DB2_ADLStaging_Default",
-										"description": "A query returns applicable data for each from DB2 which is then copied into Azure Data Lake in a staging folder. File path and name are dynamically derived from the Metadata lookup.",
-										"type": "Copy",
-										"dependsOn": [],
-										"policy": {
-											"timeout": "7.00:00:00",
-											"retry": 0,
-											"retryIntervalInSeconds": 30,
-											"secureOutput": false,
-											"secureInput": false
-										},
-										"userProperties": [],
-										"typeProperties": {
-											"source": {
-												"type": "AzureSqlSource",
-												"sqlReaderQuery": {
-													"value": "@activity('Lookup_SourceSelectSQL').output.firstRow.Query",
-													"type": "Expression"
-												},
-												"queryTimeout": "02:00:00"
-											},
-											"sink": {
-												"type": "ParquetSink",
-												"storeSettings": {
-													"type": "AzureBlobFSWriteSettings"
-												}
-											},
-											"enableStaging": false,
-											"parallelCopies": {
-												"value": "@pipeline().parameters.JobParallelism",
-												"type": "Expression"
-											}
-										},
-										"inputs": [
-											{
-												"referenceName": "ds_AzureSqlTable_ETL_Ingestion1",
-												"type": "DatasetReference"
-											}
-										],
-										"outputs": [
-											{
-												"referenceName": "ds_ADLSG2parquet_DataLakeIngestionNamedFile",
-												"type": "DatasetReference",
-												"parameters": {
-													"FolderPath": {
-														"value": "@concat( item().DataLakeStagingFolder, '/', replace(item().TargetSchemaTable, '.', '_'))",
-														"type": "Expression"
-													},
-													"FileName": {
-														"value": "@concat(item().TargetSchemaTable,'_',string(pipeline().parameters.MasterProcessNumber),'.parquet')",
-														"type": "Expression"
-													}
-												}
-											}
-										]
-									},
-									{
-										"name": "SP_JobTableLogUpdate_Default",
-										"description": "This stored procedure updates the JobTableLog with the SQL statement used and the number of rows read after successful execution of the copy from DB2 to staging",
-										"type": "SqlServerStoredProcedure",
-										"dependsOn": [
-											{
-												"activity": "Copy_DB2_ADLStaging_Default",
-												"dependencyConditions": [
-													"Succeeded"
-												]
-											}
-										],
-										"policy": {
-											"timeout": "7.00:00:00",
-											"retry": 0,
-											"retryIntervalInSeconds": 30,
-											"secureOutput": false,
-											"secureInput": false
-										},
-										"userProperties": [],
-										"typeProperties": {
-											"storedProcedureName": "[dbo].[usp_JobTableLogIngestionUpdate]",
-											"storedProcedureParameters": {
-												"JobTableLogID": {
-													"value": {
-														"value": "@{activity('LookUp_JobTableLogStart').output.value[0].JobTableLogID}",
-														"type": "Expression"
-													},
-													"type": "Int32"
-												},
-												"RowsCopied": {
-													"value": {
-														"value": "@activity('Copy_DB2_ADLStaging_Default').output.rowsCopied",
-														"type": "Expression"
-													},
-													"type": "Int32"
-												},
-												"SqlStatementUsed": {
-													"value": {
-														"value": "@activity('Lookup_SourceSelectSQL').output.firstRow.Query",
-														"type": "Expression"
-													},
-													"type": "String"
-												}
-											}
-										},
-										"linkedServiceName": {
-											"referenceName": "ls_AzureSqlDatabase_autoresolveintegrationruntime_sql",
-											"type": "LinkedServiceReference"
-										}
 									}
 								]
 							}
@@ -705,7 +601,7 @@
 									"queryTimeout": "02:00:00"
 								},
 								"dataset": {
-									"referenceName": "ds_AzureSqlTable_ETL_MetadataIngestionList",
+									"referenceName": "ds_framework",
 									"type": "DatasetReference"
 								}
 							}
@@ -764,7 +660,7 @@
 								}
 							},
 							"linkedServiceName": {
-								"referenceName": "ls_AzureSqlDatabase_autoresolveintegrationruntime_sql",
+								"referenceName": "ls_framework",
 								"type": "LinkedServiceReference"
 							}
 						},
@@ -801,7 +697,7 @@
 								}
 							},
 							"linkedServiceName": {
-								"referenceName": "ls_AzureSqlDatabase_autoresolveintegrationruntime_sql",
+								"referenceName": "ls_framework",
 								"type": "LinkedServiceReference"
 							}
 						},
@@ -893,7 +789,7 @@
 								}
 							},
 							"linkedServiceName": {
-								"referenceName": "ls_AzureSqlDatabase_autoresolveintegrationruntime_sql",
+								"referenceName": "ls_framework",
 								"type": "LinkedServiceReference"
 							}
 						}
@@ -933,7 +829,7 @@
 					}
 				},
 				"linkedServiceName": {
-					"referenceName": "ls_AzureSqlDatabase_autoresolveintegrationruntime_sql",
+					"referenceName": "ls_framework",
 					"type": "LinkedServiceReference"
 				}
 			}

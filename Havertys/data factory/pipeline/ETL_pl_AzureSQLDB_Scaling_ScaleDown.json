@@ -60,7 +60,7 @@
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
-						"referenceName": "ds_AzureSqlTable_ETL_Master",
+						"referenceName": "ds_framework",
 						"type": "DatasetReference"
 					}
 				}

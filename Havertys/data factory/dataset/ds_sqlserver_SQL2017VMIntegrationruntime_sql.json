@@ -1,0 +1,27 @@
+{
+    "name": "ds_SQL2017VMIntegrationruntime_sql",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "ls_SQL2017VMIntegrationruntime_sql",
+            "type": "LinkedServiceReference",
+            "parameters": {
+                "SecretName": {
+                    "value": "@dataset().SecretName",
+                    "type": "Expression"
+                }
+            }
+        },
+        "folder": {
+			"name": "DataSystems"
+        },
+        "parameters": {
+            "SecretName": {
+                "type": "string",
+                "defaultValue": "kv-bimlexample-connstr"
+            }
+        },
+        "annotations": [],
+        "type": "SqlServerTable",
+        "schema": []
+    }
+}

@@ -1,0 +1,27 @@
+{
+	"name": "ds_AzureSqlDatabase_autoresolveintegrationruntime_sql",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_AzureSqlDatabase_autoresolveintegrationruntime_sql",
+			"type": "LinkedServiceReference",
+            "parameters": {
+                "SecretName": {
+                    "value": "@dataset().SecretName",
+					"type": "Expression"
+				}
+			}
+		},
+		"folder": {
+			"name": "DataSystems"
+		},
+		"parameters": {
+            "SecretName": {
+                "type": "string",
+                "defaultValue": "kv-adflanding-connstr"
+            }
+		},
+		"annotations": [],
+		"type": "AzureSqlTable"
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

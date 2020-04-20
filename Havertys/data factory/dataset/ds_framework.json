@@ -1,0 +1,15 @@
+{
+	"name": "ds_framework",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_framework",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Framework"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable"
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

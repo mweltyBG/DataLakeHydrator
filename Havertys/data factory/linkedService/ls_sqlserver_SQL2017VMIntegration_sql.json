@@ -2,9 +2,9 @@
 	"name": "ls_sqlserver_SQL2017VMIntegration_sql",
 	"properties": {
 		"parameters": {
-			"DataStoreName": {
+			"SecretName": {
 				"type": "string",
-				"defaultValue": "SampleSource"
+				"defaultValue": "kv-SampleSource-connstr"
 			}
 		},
 		"annotations": [],
@@ -17,7 +17,7 @@
 					"type": "LinkedServiceReference"
 				},
 				"secretName": {
-					"value": "@concat('kv-',linkedService().DataStoreName,'-connstr')",
+					"value": "@linkedService().SecretName",
 					"type": "Expression"
 				}
 			}

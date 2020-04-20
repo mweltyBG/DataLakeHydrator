@@ -1,0 +1,44 @@
+{
+	"name": "ds_adlsv2_SQL2017VMIntegration_datalake_file_parquet",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_adlsv2_SQL2017VMIntegration_datalake",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"FolderPath": {
+				"type": "string",
+				"defaultValue": "datalake/staging/master data/product/DB203002"
+			},
+			"FileName": {
+				"type": "string",
+				"defaultValue": "Testing.parquet"
+			}
+		},
+		"folder": {
+			"name": "FileSystems"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().FileName",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@substring(dataset().FolderPath, indexof(dataset().FolderPath, '/'), sub(length(dataset().FolderPath), indexof(dataset().FolderPath, '/')) )",
+					"type": "Expression"
+				},
+				"fileSystem": {
+					"value": "@substring(dataset().FolderPath, 0, indexof(dataset().FolderPath, '/') )",
+					"type": "Expression"
+				}
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

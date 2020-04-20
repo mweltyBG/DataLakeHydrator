@@ -3,9 +3,9 @@
 	"type": "Microsoft.DataFactory/factories/linkedservices",
 	"properties": {
 		"parameters": {
-			"DataStoreName": {
+			"SecretName": {
 				"type": "string",
-				"defaultValue": "adflanding"
+				"defaultValue": "kv-adflanding-connstr"
 			}
 		},"annotations": [],
 		"type": "AzureSqlDatabase",
@@ -17,7 +17,7 @@
 					"type": "LinkedServiceReference"
 				},
 				"secretName": {
-					"value": "@concat('kv-',linkedService().DataStoreName,'-connstr')",
+					"value": "@linkedService().SecretName",
 					"type": "Expression"
 				}
 			}
