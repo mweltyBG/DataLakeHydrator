@@ -7,14 +7,7 @@
 				"name": "LookUp_MasterJobStart",
 				"description": "This LookUp calls a stored procedure which creates the ETL.JobMaster status row and returns the MasterProcessNumber ",
 				"type": "Lookup",
-				"dependsOn": [
-					{
-						"activity": "Execute_pl_ScaleDBUp",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -42,34 +35,6 @@
 						"type": "DatasetReference"
 					},
 					"firstRowOnly": true
-				}
-			},
-			{
-				"name": "Execute_pl_ScaleDBUp",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "Lookup_KeyValueConfig",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ETL_pl_AzureSQLDB_Scaling",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"ServiceTier": "GeneralPurpose",
-						"ComputeSize": {
-							"value": "@activity('Lookup_KeyValueConfig').output.firstRow.SQLComputeSizeHigh",
-							"type": "Expression"
-						},
-						"AzureRegionName": "East US"
-					}
 				}
 			},
 			{
@@ -118,30 +83,6 @@
 							"linkedServiceName": {
 								"referenceName": "ls_framework",
 								"type": "LinkedServiceReference"
-							}
-						},
-						{
-							"name": "Execute ETL_pl_ScaleDown",
-							"type": "ExecutePipeline",
-							"dependsOn": [
-								{
-									"activity": "SP_MasterJobEnd_Failure_Pipeline_BadRestCall",
-									"dependencyConditions": [
-										"Completed"
-									]
-								}
-							],
-							"userProperties": [],
-							"typeProperties": {
-								"pipeline": {
-									"referenceName": "ETL_pl_AzureSQLDB_Scaling_ScaleDown",
-									"type": "PipelineReference"
-								},
-								"waitOnCompletion": false,
-								"parameters": {
-									"ServiceTier": "GeneralPurpose",
-									"AzureRegionName": "East US"
-								}
 							}
 						}
 					],
@@ -244,31 +185,6 @@
 				"linkedServiceName": {
 					"referenceName": "ls_framework",
 					"type": "LinkedServiceReference"
-				}
-			},
-			{
-				"name": "Lookup_KeyValueConfig",
-				"description": "This LookUp calls a stored procedure which\npulls the key/value pairs ",
-				"type": "Lookup",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "AzureSqlSource",
-						"sqlReaderQuery": "SELECT dbo.udf_GetETLConfiguration('SQLComputeSizeHigh') AS SQLComputeSizeHigh",
-						"queryTimeout": "02:00:00"
-					},
-					"dataset": {
-						"referenceName": "ds_framework",
-						"type": "DatasetReference"
-					}
 				}
 			}
 		],
