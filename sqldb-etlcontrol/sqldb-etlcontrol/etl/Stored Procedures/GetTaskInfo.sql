@@ -1,7 +1,7 @@
 ﻿
 
 
-CREATE PROCEDURE etl.GetTaskInfo 
+CREATE OR ALTER PROCEDURE etl.GetTaskInfo 
 	@TaskAuditKey INT
 AS
 
@@ -11,7 +11,9 @@ SELECT
 	TargetDataLakeContainer, 
 	TargetDataLakeFolder, 
 	COALESCE(TargetDataLakeFileName, SourceTableName, 'import') AS TargetDataLakeFileName, 
-	TargetFileCompressionType 
+	TargetFileCompressionType,
+	Task.DataIntegrationUnits,
+	Task.DegreeOfParalleism 
 FROM etl.TaskAudit 
 INNER JOIN etl.Task 
 	ON TaskAudit.TaskKey = Task.TaskKey 
