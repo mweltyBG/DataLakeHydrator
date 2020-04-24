@@ -12,8 +12,8 @@ SELECT
 	TargetDataLakeFolder, 
 	COALESCE(TargetDataLakeFileName, SourceTableName, 'import') AS TargetDataLakeFileName, 
 	TargetFileCompressionType,
-	Task.DataIntegrationUnits,
-	Task.DegreeOfParalleism 
+	Task.LoadCuratedModel,
+	Task.CustomShufflePartitions
 FROM etl.TaskAudit 
 INNER JOIN etl.Task 
 	ON TaskAudit.TaskKey = Task.TaskKey 
