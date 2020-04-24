@@ -60,6 +60,7 @@
     <Folder Include="etl\Tables\" />
     <Folder Include="etl\Stored Procedures\" />
     <Folder Include="Security\" />
+    <Folder Include="etl\Functions\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="etl\Tables\Job.sql" />
@@ -80,5 +81,7 @@
     <Build Include="etl\Stored Procedures\GetTaskInfo.sql" />
     <Build Include="etl\Stored Procedures\GetTaskQuery.sql" />
     <Build Include="Security\etl.sql" />
+    <Build Include="etl\Functions\PerformTokenSubstitution.sql" />
+    <Build Include="etl\Functions\GetLiteralFromToken.sql" />
   </ItemGroup>
 </Project>

@@ -1,222 +1,222 @@
 {
-	"name": "pl_taskaudit_launcher",
-	"properties": {
-		"activities": [
-			{
-				"name": "TaskAuditStart",
-				"type": "Lookup",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "AzureSqlSource",
-						"sqlReaderStoredProcedureName": "[etl].[TaskAuditStart]",
-						"storedProcedureParameters": {
-							"TaskAuditKey": {
-								"type": "Int32",
-								"value": {
-									"value": "@pipeline().parameters.TaskAuditKey",
-									"type": "Expression"
-								}
-							}
-						}
-					},
-					"dataset": {
-						"referenceName": "ds_azure_sql_etlcontrol",
-						"type": "DatasetReference"
-					},
-					"firstRowOnly": true
-				}
-			},
-			{
-				"name": "AdvancedTaskCheck",
-				"type": "IfCondition",
-				"dependsOn": [
-					{
-						"activity": "TaskAuditStart",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"expression": {
-						"value": "@activity('TaskAuditStart').output.firstRow.IsAdvancedTask",
-						"type": "Expression"
-					},
-					"ifFalseActivities": [
-						{
-							"name": "Set_ConfigName_FalseCondition",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "ConfigName",
-								"value": "Standard"
-							}
-						}
-					],
-					"ifTrueActivities": [
-						{
-							"name": "Set_ConfigName_TrueCondition",
-							"description": "",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "ConfigName",
-								"value": {
-									"value": "@activity('TaskAuditStart').output.firstRow.AdvancedConfigName",
-									"type": "Expression"
-								}
-							}
-						}
-					]
-				}
-			},
-			{
-				"name": "ExecuteTaskPipeline",
-				"description": "Execute either the \"Standard\" task pipeline or if this is an \"advanced\" task, then execute the pipeline that corresponds to the AdvancedConfigName assigned to the ConfigName variable",
-				"type": "Switch",
-				"dependsOn": [
-					{
-						"activity": "AdvancedTaskCheck",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"on": {
-						"value": "@variables('ConfigName')",
-						"type": "Expression"
-					},
-					"cases": [
-						{
-							"value": "Standard",
-							"activities": [
-								{
-									"name": "Execute_pl_standard_ingest",
-									"description": "Run the standard ingestion pipeline",
-									"type": "ExecutePipeline",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"pipeline": {
-											"referenceName": "pl_standard_ingest",
-											"type": "PipelineReference"
-										},
-										"waitOnCompletion": true,
-										"parameters": {
-											"TaskAuditKey": {
-												"value": "@pipeline().parameters.TaskAuditKey",
-												"type": "Expression"
-											}
-										}
-									}
-								}
-							]
-						}
-					]
-				}
-			},
-			{
-				"name": "TaskAuditFailure",
-				"description": "If the pipeline registered an error, then mark this TaskAudit row as failed",
-				"type": "SqlServerStoredProcedure",
-				"dependsOn": [
-					{
-						"activity": "ExecuteTaskPipeline",
-						"dependencyConditions": [
-							"Failed"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"storedProcedureName": "[etl].[TaskAuditFailure]",
-					"storedProcedureParameters": {
-						"TaskAuditKey": {
-							"value": {
-								"value": "@pipeline().parameters.TaskAuditKey",
-								"type": "Expression"
-							},
-							"type": "Int32"
-						}
-					}
-				},
-				"linkedServiceName": {
-					"referenceName": "ls_azure_sqldb_etlcontrol",
-					"type": "LinkedServiceReference"
-				}
-			},
-			{
-				"name": "TaskAuditSuccess",
-				"description": "If the pipeline finished successfully, then mark this TaskAudit row as successfully complete",
-				"type": "SqlServerStoredProcedure",
-				"dependsOn": [
-					{
-						"activity": "ExecuteTaskPipeline",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"storedProcedureName": "[etl].[TaskAuditSuccess]",
-					"storedProcedureParameters": {
-						"TaskAuditKey": {
-							"value": {
-								"value": "@pipeline().parameters.TaskAuditKey",
-								"type": "Expression"
-							},
-							"type": "Int32"
-						}
-					}
-				},
-				"linkedServiceName": {
-					"referenceName": "ls_azure_sqldb_etlcontrol",
-					"type": "LinkedServiceReference"
-				}
-			}
-		],
-		"parameters": {
-			"TaskAuditKey": {
-				"type": "int",
-				"defaultValue": 1
-			}
-		},
-		"variables": {
-			"ConfigName": {
-				"type": "String",
-				"defaultValue": "Standard"
-			}
-		},
-		"annotations": []
-	},
-	"type": "Microsoft.DataFactory/factories/pipelines"
+    "name": "pl_taskaudit_launcher",
+    "properties": {
+        "activities": [
+            {
+                "name": "TaskAuditStart",
+                "type": "Lookup",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "AzureSqlSource",
+                        "sqlReaderStoredProcedureName": "[etl].[TaskAuditStart]",
+                        "storedProcedureParameters": {
+                            "TaskAuditKey": {
+                                "type": "Int32",
+                                "value": {
+                                    "value": "@pipeline().parameters.TaskAuditKey",
+                                    "type": "Expression"
+                                }
+                            }
+                        }
+                    },
+                    "dataset": {
+                        "referenceName": "ds_azure_sql_etlcontrol",
+                        "type": "DatasetReference"
+                    },
+                    "firstRowOnly": true
+                }
+            },
+            {
+                "name": "AdvancedTaskCheck",
+                "type": "IfCondition",
+                "dependsOn": [
+                    {
+                        "activity": "TaskAuditStart",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "userProperties": [],
+                "typeProperties": {
+                    "expression": {
+                        "value": "@activity('TaskAuditStart').output.firstRow.IsAdvancedTask",
+                        "type": "Expression"
+                    },
+                    "ifFalseActivities": [
+                        {
+                            "name": "Set_ConfigName_FalseCondition",
+                            "type": "SetVariable",
+                            "dependsOn": [],
+                            "userProperties": [],
+                            "typeProperties": {
+                                "variableName": "ConfigName",
+                                "value": "Standard"
+                            }
+                        }
+                    ],
+                    "ifTrueActivities": [
+                        {
+                            "name": "Set_ConfigName_TrueCondition",
+                            "description": "",
+                            "type": "SetVariable",
+                            "dependsOn": [],
+                            "userProperties": [],
+                            "typeProperties": {
+                                "variableName": "ConfigName",
+                                "value": {
+                                    "value": "@activity('TaskAuditStart').output.firstRow.AdvancedConfigName",
+                                    "type": "Expression"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "name": "ExecuteTaskPipeline",
+                "description": "Execute either the \"Standard\" task pipeline or if this is an \"advanced\" task, then execute the pipeline that corresponds to the AdvancedConfigName assigned to the ConfigName variable",
+                "type": "Switch",
+                "dependsOn": [
+                    {
+                        "activity": "AdvancedTaskCheck",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "userProperties": [],
+                "typeProperties": {
+                    "on": {
+                        "value": "@variables('ConfigName')",
+                        "type": "Expression"
+                    },
+                    "cases": [
+                        {
+                            "value": "Standard",
+                            "activities": [
+                                {
+                                    "name": "Execute_pl_standard_ingest",
+                                    "description": "Run the standard ingestion pipeline",
+                                    "type": "ExecutePipeline",
+                                    "dependsOn": [],
+                                    "userProperties": [],
+                                    "typeProperties": {
+                                        "pipeline": {
+                                            "referenceName": "pl_standard_ingest",
+                                            "type": "PipelineReference"
+                                        },
+                                        "waitOnCompletion": true,
+                                        "parameters": {
+                                            "TaskAuditKey": {
+                                                "value": "@pipeline().parameters.TaskAuditKey",
+                                                "type": "Expression"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "name": "TaskAuditFailure",
+                "description": "If the pipeline registered an error, then mark this TaskAudit row as failed",
+                "type": "SqlServerStoredProcedure",
+                "dependsOn": [
+                    {
+                        "activity": "ExecuteTaskPipeline",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "storedProcedureName": "[etl].[TaskAuditFailure]",
+                    "storedProcedureParameters": {
+                        "TaskAuditKey": {
+                            "value": {
+                                "value": "@pipeline().parameters.TaskAuditKey",
+                                "type": "Expression"
+                            },
+                            "type": "Int32"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_azure_sqldb_etlcontrol",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "TaskAuditSuccess",
+                "description": "If the pipeline finished successfully, then mark this TaskAudit row as successfully complete",
+                "type": "SqlServerStoredProcedure",
+                "dependsOn": [
+                    {
+                        "activity": "ExecuteTaskPipeline",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "storedProcedureName": "[etl].[TaskAuditSuccess]",
+                    "storedProcedureParameters": {
+                        "TaskAuditKey": {
+                            "value": {
+                                "value": "@pipeline().parameters.TaskAuditKey",
+                                "type": "Expression"
+                            },
+                            "type": "Int32"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_azure_sqldb_etlcontrol",
+                    "type": "LinkedServiceReference"
+                }
+            }
+        ],
+        "parameters": {
+            "TaskAuditKey": {
+                "type": "int",
+                "defaultValue": 1
+            }
+        },
+        "variables": {
+            "ConfigName": {
+                "type": "String",
+                "defaultValue": "Standard"
+            }
+        },
+        "annotations": []
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
 }
