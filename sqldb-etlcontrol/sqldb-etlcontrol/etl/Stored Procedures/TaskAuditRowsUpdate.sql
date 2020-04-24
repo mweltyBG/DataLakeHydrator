@@ -1,6 +1,6 @@
 
 
-CREATE OR ALTER PROCEDURE [etl].[TaskAuditRowsUpdate] (
+CREATE PROCEDURE [etl].[TaskAuditRowsUpdate] (
 	@TaskAuditKey INT, @RowsRead BIGINT, @RowsCopied BIGINT
 )
 AS

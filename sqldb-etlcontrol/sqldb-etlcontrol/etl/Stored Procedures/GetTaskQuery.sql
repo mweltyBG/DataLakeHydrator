@@ -1,5 +1,5 @@
 ﻿
-CREATE OR ALTER PROCEDURE [etl].[GetTaskQuery]
+CREATE PROCEDURE [etl].[GetTaskQuery]
 (@TaskKey INT,
  @TaskAuditKey INT,
  @ETLExtractDatetime DATETIME = NULL
@@ -32,8 +32,8 @@ DECLARE @InsertDateTime DATETIME = '1900-01-01'
 	DECLARE @SourceQuery NVARCHAR(4000) -- (optional) a customized query that overrrides the SourceTableName
 	--DECLARE @SqlOverrideQuery NVARCHAR(4000) -- probably deprecate this
 	DECLARE @IsSelectDistinctFlag BIT -- (optional) set to true if the query needs to include a "distinct" clause
-	DECLARE @TargetDataLakeContainer NVARCHAR(200) -- (required) the target name of the container for the parquet file to be dropped into
-	DECLARE @TargetDataLakeFolder NVARCHAR(200) -- (required)
+	--DECLARE @TargetDataLakeContainer NVARCHAR(200) -- (required) the target name of the container for the parquet file to be dropped into
+	--DECLARE @TargetDataLakeFolder NVARCHAR(200) -- (required)
 	DECLARE @IsIncrementalFlag BIT -- (optional) enables incremental-loading functionality
 	DECLARE @IncrementDatatype NVARCHAR(200) -- (optional but required for incremental) 
 	--DECLARE @IncrementTableName NVARCHAR(200) -- probably deprecate this
@@ -60,8 +60,8 @@ DECLARE @InsertDateTime DATETIME = '1900-01-01'
 		@SourceWhereClause = ISNULL(SourceWhereClause, ''),
 --		@SqlOverrideQuery = ISNULL(SqlOverrideQuery, ''),
 		@IsSelectDistinctFlag = IsSelectDistinctFlag,
-		@TargetDataLakeContainer = ISNULL(TargetDataLakeContainer, ''),
-		@TargetDataLakeFolder = ISNULL(TargetDataLakeFolder, ''),
+--		@TargetDataLakeContainer = ISNULL(TargetDataLakeContainer, ''),
+--		@TargetDataLakeFolder = ISNULL(TargetDataLakeFolder, ''),
 		@IsIncrementalFlag = IsIncrementalFlag,
 		@IncrementDatatype = ISNULL(IncrementDatatype, ''),
 --		@IncrementTableName = ISNULL(IncrementTableName, ''),
