@@ -1,0 +1,21 @@
+{
+    "name": "ls_sqlserver_scardella_sql",
+    "properties": {
+        "annotations": [],
+        "type": "SqlServer",
+        "typeProperties": {
+            "connectionString": {
+                "type": "AzureKeyVaultSecret",
+                "store": {
+                    "referenceName": "ls_keyvault",
+                    "type": "LinkedServiceReference"
+                },
+                "secretName": "kv-samplesourcesqlauth-connstr"
+            }
+        },
+        "connectVia": {
+            "referenceName": "ir-scardella-onprem",
+            "type": "IntegrationRuntimeReference"
+        }
+    }
+}
