@@ -31,6 +31,8 @@
     [TimeZoneName]              NVARCHAR (200)  NULL,
     [LoadCuratedModel]          BIT  DEFAULT(0) NOT NULL,
     [CustomShufflePartitions]   INT DEFAULT(8) NOT NULL,
+    [CuratedDBName]             NVARCHAR (200)  NULL,
+    [CuratedTableName]          NVARCHAR (200)  NULL,
     [DisableLimitUpdate]        BIT             DEFAULT ((0)) NOT NULL,
     [DisableAction]             BIT             DEFAULT ((0)) NULL,
     CONSTRAINT [PK_etl_Task] PRIMARY KEY CLUSTERED ([TaskKey] ASC)
