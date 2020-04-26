@@ -14,6 +14,7 @@ SELECT
 	Task.TargetDataLakeFolder, 
 	COALESCE(Task.TargetDataLakeFileName, Task.SourceTableName, 'data') AS TargetDataLakeFileName, 
 	Task.TargetFileCompressionType,
+	Task.IsIncrementalFlag,
 	Task.LoadCuratedModel,
 	Task.CustomShufflePartitions,
 	Task.CuratedDBName,
