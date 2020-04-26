@@ -2,7 +2,8 @@
 
 
 CREATE PROCEDURE [etl].[TaskAuditStart] (
-	@TaskAuditKey INT
+	@TaskAuditKey INT,
+	@PipelineRunID NVARCHAR(50) = ''
 )
 AS
 
@@ -17,7 +18,7 @@ BEGIN
 END
 ELSE
 BEGIN
-	UPDATE etl.TaskAudit SET IsRunning = 1, StartTime = GETUTCDATE(), Status = 'Execution started' WHERE TaskAuditKey = @TaskAuditKey
+	UPDATE etl.TaskAudit SET IsRunning = 1, StartTime = GETUTCDATE(), Status = 'Execution started', PipelineRunID = @PipelineRunID WHERE TaskAuditKey = @TaskAuditKey
 
 	SELECT TOP 1 
 		Task.TaskKey

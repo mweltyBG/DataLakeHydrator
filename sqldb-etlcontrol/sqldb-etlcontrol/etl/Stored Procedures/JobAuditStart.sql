@@ -3,7 +3,8 @@
 
 CREATE PROCEDURE [etl].[JobAuditStart] (
 	@JobName NVARCHAR(500) = 'default',
-	@DataFactoryName NVARCHAR(200) = 'unknown'
+	@DataFactoryName NVARCHAR(200) = 'unknown',
+	@PipelineRunID NVARCHAR(50) = ''
 )
 AS
 
@@ -11,6 +12,7 @@ SET @JobName = ISNULL(NULLIF(@JobName, ''), 'default')
 
 DECLARE @IdentityValue int, @MasterProcessNumber int, @Parallelism int;
 
+-- Josh Fennessy 2020-04-26: added PipelineRunId for audit purposes
 -- David 2020-04-15: explore whether setting job parallelism for ADF pipelines makes sense
 --SELECT @Parallelism = JobParallelism FROM ETL.JobParallelism WHERE JobConfiguration = @JobConfiguration;
 
@@ -69,8 +71,8 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		INSERT INTO etl.JobAudit (JobKey, StartTime, Status, DataFactoryName)
-		VALUES (@JobKey, GETUTCDATE(), @JobStatus, @DataFactoryName)
+		INSERT INTO etl.JobAudit (JobKey, StartTime, Status, DataFactoryName, PipelineRunID)
+		VALUES (@JobKey, GETUTCDATE(), @JobStatus, @DataFactoryName, @PipelineRunID)
 
 		DECLARE @JobAuditKey INT
 		SET @JobAuditKey = SCOPE_IDENTITY()

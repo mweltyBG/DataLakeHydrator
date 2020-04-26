@@ -14,6 +14,7 @@
     [IsRunning]    BIT             NULL,
     [LastUpdated]  DATETIME        NULL,
     [DebugString]  NVARCHAR (4000) NULL,
+    [PipelineRunID]   NVARCHAR (50)   NULL,
     CONSTRAINT [PK_TaskAuditKey] PRIMARY KEY CLUSTERED ([TaskAuditKey] ASC)
 );
 

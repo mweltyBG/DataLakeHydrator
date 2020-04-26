@@ -6,6 +6,7 @@
     [EndTime]         DATETIME       NULL,
     [Status]          NVARCHAR (50)  NULL,
     [DataFactoryName] NVARCHAR (200) NULL,
+    [PipelineRunID]  NVARCHAR (50)  NULL,
     CONSTRAINT [PK_JobAudit] PRIMARY KEY CLUSTERED ([JobAuditKey] ASC)
 );
 
