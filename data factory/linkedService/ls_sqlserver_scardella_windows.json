@@ -1,0 +1,30 @@
+{
+    "name": "ls_sqlserver_scardella_windows",
+    "properties": {
+        "annotations": [],
+        "type": "SqlServer",
+        "typeProperties": {
+            "connectionString": {
+                "type": "AzureKeyVaultSecret",
+                "store": {
+                    "referenceName": "ls_keyvault",
+                    "type": "LinkedServiceReference"
+                },
+                "secretName": "kv-sourcesystem-connstr"
+            },
+            "userName": "SqlServer2017\\ADFWindowsUser",
+            "password": {
+                "type": "AzureKeyVaultSecret",
+                "store": {
+                    "referenceName": "ls_keyvault",
+                    "type": "LinkedServiceReference"
+                },
+                "secretName": "kv-sourcesystem-passwd"
+            }
+        },
+        "connectVia": {
+            "referenceName": "ir-scardella-onprem",
+            "type": "IntegrationRuntimeReference"
+        }
+    }
+}
