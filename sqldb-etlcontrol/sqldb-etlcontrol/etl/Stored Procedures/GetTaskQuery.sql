@@ -17,7 +17,7 @@ DECLARE @InsertDateTime DATETIME = '1900-01-01'
 -- Current SourceTypes supported are
 	-- "SQL": on-premise or Azure SQL database
 	DECLARE @SupportedSourceTypes NVARCHAR(1000)
-	SET @SupportedSourceTypes = 'SQL'
+	SET @SupportedSourceTypes = 'SQL,mysql'
 
 	DECLARE @ErrorMessage NVARCHAR(2048) -- just declare this here. there are several spots later where we may attempt to use this
 
