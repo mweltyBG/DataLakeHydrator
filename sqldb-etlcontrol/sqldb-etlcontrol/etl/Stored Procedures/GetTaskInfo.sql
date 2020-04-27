@@ -15,10 +15,10 @@ SELECT
 	COALESCE(Task.TargetDataLakeFileName, Task.SourceTableName, 'data') AS TargetDataLakeFileName, 
 	Task.TargetFileCompressionType,
 	Task.IsIncrementalFlag,
-	Task.LoadCuratedModel,
+	Task.LoadRawReplica,
 	Task.CustomShufflePartitions,
-	Task.CuratedDBName,
-	Task.CuratedTableName,
+	Task.RawReplicaDBName,
+	Task.RawReplicaTableName,
 	Task.PrimaryKeyColumnList
 FROM etl.TaskAudit 
 INNER JOIN etl.Task 
