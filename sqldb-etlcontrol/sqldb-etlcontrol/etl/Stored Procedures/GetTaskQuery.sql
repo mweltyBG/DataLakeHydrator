@@ -1,5 +1,5 @@
 ﻿
-CREATE OR ALTER PROCEDURE [etl].[GetTaskQuery]
+CREATE PROCEDURE [etl].[GetTaskQuery]
 (@TaskKey INT,
  @TaskAuditKey INT,
  @ETLExtractDatetime DATETIME = NULL
@@ -93,7 +93,7 @@ DECLARE @InsertDateTime DATETIME = '1900-01-01'
 			-- build a custom query based on all the supplied options
 			SET @Query = 'SELECT '
 
-			IF @IsSelectDistinctFlag = 1 AND @SourceType IN ('SQL')
+			IF @IsSelectDistinctFlag = 1 AND @SourceType IN ('SQL', 'mysql')
 				SET @Query = @Query + 'DISTINCT '
 
 			-- Columns
@@ -108,7 +108,7 @@ DECLARE @InsertDateTime DATETIME = '1900-01-01'
 			-- TaskAuditKey:
 			SET @MetadataColumns = @MetadataColumns + 
 				CASE 
-					WHEN @SourceType IN ('Oracle')
+					WHEN @SourceType IN ('Oracle', 'mysql')
 					THEN 'CAST(' + CAST(@TaskAuditKey AS NVARCHAR) + ' AS NUMBER(10)) AS "TaskAuditKey", '
 					ELSE CAST(@TaskAuditKey AS NVARCHAR) + ' AS TaskAuditKey, '
 				END 
@@ -119,7 +119,7 @@ DECLARE @InsertDateTime DATETIME = '1900-01-01'
 
 			SET @MetadataColumns = @MetadataColumns + 
 				CASE 
-					WHEN @SourceType IN ('Oracle')
+					WHEN @SourceType IN ('Oracle', 'mysql')
 					THEN 'CAST(''' + CONVERT(varchar, @ETLExtractDatetime, 6) + ''' AS DATE) AS "ETLExtractDatetime"'
 					ELSE 'CAST(''' + CONVERT(varchar, @ETLExtractDatetime, 120) + ''' AS DATETIME) AS ETLExtractDatetime'
 				END 	
@@ -138,6 +138,16 @@ DECLARE @InsertDateTime DATETIME = '1900-01-01'
 					SET @Query = @Query + '[' + @SourceSchemaName + '].'
 
 				SET @Query = @Query + '[' + @SourceTableName + '] '
+			END
+
+			IF @SourceType = 'mysql'
+			BEGIN
+				SET @Query = @Query + 'FROM '
+
+				IF @SourceSchemaName != ''
+					SET @Query = @Query + @SourceSchemaName + '.'
+
+				SET @Query = @Query + @SourceTableName + ' '
 			END
 
 			-- WHERE clause and incremental functionality
