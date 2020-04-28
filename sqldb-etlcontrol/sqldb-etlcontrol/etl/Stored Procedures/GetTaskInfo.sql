@@ -8,6 +8,7 @@ CREATE PROCEDURE [etl].[GetTaskInfo]
 AS
 
 /*
+Target Notes
 There are three places that a file could go within the datalake:
 	1. The transient landing area. This is overwritten during each ETL execution, hence the "transience"
 	2. Persisted raw area. This is where data is persisted long-term, usually in a folder or file that contains a timestamp.
@@ -41,6 +42,31 @@ If the path value is enclosed in curly brackets, then we will join to etl.KeyVal
 If one is found, then we will return the ConfigValue and attempt to interpret it (if it contains additional tokens) and then use that for the path.
 Otherwise if no value is returned from etl.KeyValueConfig but the path value is still enclosed in curly brackets, then we'll attempt to interpret any tokens and then use the subsequent value for the path.
 Finally, if there are no curly brackets, then we'll just use the path value as-is.
+
+Source Notes
+You can override the default actions of a source by filling in an entry in etl.Sources.  You do NOT need an entry if you're using all defaults.  You'll need to set up
+ADF to look for this string setup in the switch:
+
+Azure SQL (defaults): AzureSQL
+Azure SQL (specify integration runtime): AzureSQL_integrationruntime
+SQL Server (defaults): SQLServer_SQL
+SQL Server (specify integration runtime): SQLServer_integrationruntime_SQL
+SQL Server (Windows auth): SQLServer_Windows
+SQL Server (Windows auth and specify integration runtime): SQLServer_integrationruntime_Windows
+
+Here's what you can specify in etl.Sources:
+- Authentication Type - only currently used for SQL Server (not Azure SQL).  With Azure SQL, the connection string can contain all the authorization information.  
+  With SQL Server, using Windows authentication requires that you provide a connection string, username and password.  Since we're using Key Vault for the
+  Connection String and password, we can specify a secret name, or just use the default ('kv-' + SourceName + '-connstr' or 'kv-' + SourceName + '-passwd')
+- UserName - if the SQL Server uses Windows authentication, specify the 'Domain\User' here
+- IntegrationRuntimeName - If a source *type* can be used by more than one integration runtime, then specify which integration runtime to use here.  For
+  instance, if you're pulling from two different regional offices that each have their own IR, you'd be able to specify the IR here.
+- ConnectionStringSecret - If you want to use a different secret name from the default, which is 'kv-' + SourceName + '-connstr', specify the custom secret 
+  name here.
+- PasswordSecret - If you're using Windows authentication and using a different secret name from the default, which is 'kv-' + SourceName + '-passwd',
+  specify the custom secret name here.
+
+
 */
 
 -- the following variables will be read in from metadata on either the etl.Task or etl.KeyValueConfig tables
@@ -186,7 +212,38 @@ END
 
 SELECT 
 	Task.TaskKey,	
-	SourceType, 
+
+	-- Source info
+	CASE 
+		WHEN Task.SourceType = 'AzureSQL' AND Sources.IntegrationRuntimeName <> ''
+		THEN Task.SourceType + '_' + Sources.IntegrationRuntimeName
+		WHEN Task.SourceType = 'AzureSQL'
+		THEN 'AzureSQL'
+		WHEN Task.SourceType = 'SQLServer' AND Sources.IntegrationRuntimeName <> '' AND Sources.AuthenticationType <> ''
+		THEN Task.SourceType + '_' + Sources.IntegrationRuntimeName + '_' + Sources.AuthenticationType
+		WHEN Task.SourceType = 'SQLServer' AND Sources.IntegrationRuntimeName <> ''
+		THEN Task.SourceType + '_' + Sources.IntegrationRuntimeName + '_SQL'
+		WHEN Task.SourceType = 'SQLServer' AND Sources.AuthenticationType <> ''
+		THEN Task.SourceType + '_' + Sources.AuthenticationType
+		WHEN Task.SourceType = 'SQLServer'
+		THEN Task.SourceType + '_SQL'
+		ELSE Task.SourceType
+	END  as SourceType, -- see notes, this needs to match the switch statement
+	ISNULL(Sources.ConnectionStringSecret, 'kv-' + Task.SourceName + '-connstr') as ConnectionStringSecret,
+	CASE 
+		WHEN Task.SourceType = 'SQLServer' AND Sources.AuthenticationType = 'Windows' AND Sources.UserName <> ''
+		THEN Sources.UserName
+		ELSE ''
+	END as UserName,
+	CASE 
+		WHEN Task.SourceType = 'SQLServer' AND Sources.AuthenticationType = 'Windows' AND Sources.PasswordSecret <> ''
+		THEN Sources.PasswordSecret
+		WHEN Task.SourceType = 'SQLServer' AND Sources.AuthenticationType = 'Windows'
+		THEN 'kv-' + Task.SourceName + '-passwd'
+		ELSE ''
+	END as PasswordSecret, -- This might not be necessary.  See notes above.
+	
+	-- Target info
 	@landingAreaResolvedContainer AS TransientLandingAreaContainer,
 	@landingAreaResolvedPath AS TransientLandingAreaFolder,
 	@landingAreaResolvedFileName AS TransientLandingAreaFileName,
@@ -204,9 +261,11 @@ SELECT
 	ISNULL((SELECT TOP 1 ConfigValue FROM etl.KeyValueConfig WHERE ConfigKey = 'CuratedFileCompressionType'), 'snappy') AS CuratedFileCompressionType,
 
 	Task.DataIntegrationUnits,
-	Task.DegreeOfParalleism 
+	Task.DegreeOfParallelism 
 	
 FROM etl.TaskAudit 
 INNER JOIN etl.Task 
 	ON TaskAudit.TaskKey = Task.TaskKey 
+LEFT JOIN etl.Sources
+	ON Task.SourceName = Sources.SourceName
 WHERE TaskAuditKey = @TaskAuditKey

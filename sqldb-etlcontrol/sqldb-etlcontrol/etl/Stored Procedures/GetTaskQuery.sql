@@ -15,15 +15,16 @@ DECLARE @InsertDateTime DATETIME = '1900-01-01'
 
 -- This constructs the query against the source database. One goal is to add additional "SourceType" database support.
 -- Current SourceTypes supported are
-	-- "SQL": on-premise or Azure SQL database
-	DECLARE @SupportedSourceTypes NVARCHAR(1000)
-	SET @SupportedSourceTypes = 'SQL'
+	-- "SQLServer": on-premise SQL database
+	-- "AzureSQL": Azure SQL Database
+	DECLARE @SupportedSourceTypes NVARCHAR(1000);
+	SET @SupportedSourceTypes = 'AzureSQL,SQLserver';
 
 	DECLARE @ErrorMessage NVARCHAR(2048) -- just declare this here. there are several spots later where we may attempt to use this
 
 -- The following are the incoming values that the stored procedure gathers from the etl.Task table:
 	DECLARE @SourceType NVARCHAR(200) -- (required) type of source system (see supported options above)
-	DECLARE @SourceDatabaseName NVARCHAR(200) -- (possibly required) database/catalog name
+	--DECLARE @SourceDatabaseName NVARCHAR(200) -- (possibly required) database/catalog name
 	DECLARE @SourceSchemaName NVARCHAR(200) -- (possibly required)
 	DECLARE @SourceTableName NVARCHAR(200) -- (required unless "SourceQuery" is used)
 	DECLARE @SourceWhereClause NVARCHAR(4000) -- (optional) used with SourceTableName to support custom filtering, also required for incremental functionality
@@ -51,7 +52,7 @@ DECLARE @InsertDateTime DATETIME = '1900-01-01'
 
 	SELECT
 		@SourceType = ISNULL(SourceType, ''),
-		@SourceDatabaseName = ISNULL(SourceDatabaseName, ''), 
+		--@SourceDatabaseName = ISNULL(SourceDatabaseName, ''), 
 		@SourceSchemaName = ISNULL(SourceSchemaName, ''), 
 		@SourceTableName = ISNULL(SourceTableName, ''),
 		@SourceColumnList = ISNULL(SourceColumnList, ''), 
@@ -74,7 +75,7 @@ DECLARE @InsertDateTime DATETIME = '1900-01-01'
 	FROM etl.Task
 	WHERE Task.TaskKey= @TaskKey
 
-	IF @SupportedSourceTypes NOT LIKE '%' + @SourceType + '%'
+	IF (',' + @SupportedSourceTypes + ',') NOT LIKE '%,' + @SourceType + ',%'
 	BEGIN
 		SET @ErrorMessage =  'Error: SourceType "' + @SourceType + '" defined by TaskKey "' + CONVERT(VARCHAR(5), @TaskKey) + '" is not currently a supported SourceType. Supported SourceType options are: ' + @SupportedSourceTypes;
 		THROW 50000, @ErrorMessage, 1;
@@ -93,7 +94,7 @@ DECLARE @InsertDateTime DATETIME = '1900-01-01'
 			-- build a custom query based on all the supplied options
 			SET @Query = 'SELECT '
 
-			IF @IsSelectDistinctFlag = 1 AND @SourceType IN ('SQL')
+			IF @IsSelectDistinctFlag = 1 AND @SourceType IN ('SQLServer','AzureSQL')
 				SET @Query = @Query + 'DISTINCT '
 
 			-- Columns
@@ -127,12 +128,12 @@ DECLARE @InsertDateTime DATETIME = '1900-01-01'
 			SET @Query = @Query + ', ' + @MetadataColumns + ' '
 
 			-- FROM Clause
-			IF @SourceType = 'SQL'
+			IF @SourceType IN ('AzureSQL','SQLServer')
 			BEGIN
 				SET @Query = @Query + 'FROM '
 
-				IF @SourceDatabaseName != ''
-					SET @Query = @Query + '[' + @SourceDatabaseName + '].'
+				--IF @SourceDatabaseName != ''
+					--SET @Query = @Query + '[' + @SourceDatabaseName + '].'
 
 				IF @SourceSchemaName != ''
 					SET @Query = @Query + '[' + @SourceSchemaName + '].'
