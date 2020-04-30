@@ -108,7 +108,7 @@ DECLARE @InsertDateTime DATETIME = '1900-01-01'
 			-- TaskAuditKey:
 			SET @MetadataColumns = @MetadataColumns + 
 				CASE 
-					WHEN @SourceType IN ('Oracle', 'mysql')
+					WHEN @SourceType IN ('Oracle')
 					THEN 'CAST(' + CAST(@TaskAuditKey AS NVARCHAR) + ' AS NUMBER(10)) AS "TaskAuditKey", '
 					ELSE CAST(@TaskAuditKey AS NVARCHAR) + ' AS TaskAuditKey, '
 				END 
@@ -119,7 +119,7 @@ DECLARE @InsertDateTime DATETIME = '1900-01-01'
 
 			SET @MetadataColumns = @MetadataColumns + 
 				CASE 
-					WHEN @SourceType IN ('Oracle', 'mysql')
+					WHEN @SourceType IN ('Oracle')
 					THEN 'CAST(''' + CONVERT(varchar, @ETLExtractDatetime, 6) + ''' AS DATE) AS "ETLExtractDatetime"'
 					ELSE 'CAST(''' + CONVERT(varchar, @ETLExtractDatetime, 120) + ''' AS DATETIME) AS ETLExtractDatetime'
 				END 	
