@@ -1,4 +1,5 @@
-﻿CREATE TABLE [etl].[Task] (
+﻿
+CREATE TABLE [etl].[Task] (
     [TaskKey]                   INT             IDENTITY (1, 1) NOT NULL,
     [IsAdvancedTask]            BIT             NULL,
     [AdvancedConfigName]        NVARCHAR (200)  NULL,
@@ -29,6 +30,9 @@
     [Offset]                    NVARCHAR (200)  NULL,
     [OffsetUnit]                NVARCHAR (200)  NULL,
     [TimeZoneName]              NVARCHAR (200)  NULL,
+    [CreateStagingTableFlag]    BIT DEFAULT(0) NOT NULL,
+    [StagingDBName]             NVARCHAR(500) DEFAULT(N'') NULL,
+    [StagingTableName]          NVARCHAR(500) DEFAULT(N'') NULL,
     [LoadRawReplica]            BIT  DEFAULT(0) NOT NULL,
     [CustomShufflePartitions]   INT DEFAULT(8) NOT NULL,
     [RawReplicaDBName]             NVARCHAR (200)  NULL,
