@@ -16,6 +16,8 @@ RETURNS
 )
 AS
 BEGIN
+	DECLARE @SourceName NVARCHAR(200);
+	
 	-- dates
 	-- this one will be the default date format if not format is specified:
 	INSERT INTO @returnTable VALUES ('ETLDate', CONVERT(NVARCHAR, GETUTCDATE(), 23) + 'T' + REPLACE(CONVERT(NVARCHAR, GETUTCDATE(), 108), ':', '')) 
@@ -33,10 +35,24 @@ BEGIN
 	-- values off the Task record
 	INSERT INTO @returnTable SELECT TOP 1 'SourceName', CONVERT(NVARCHAR, Task.SourceName) FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey WHERE TaskAuditKey = @TaskAuditKey
 	INSERT INTO @returnTable SELECT TOP 1 'SourceType', CONVERT(NVARCHAR, Task.SourceType) FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey WHERE TaskAuditKey = @TaskAuditKey
-	INSERT INTO @returnTable SELECT TOP 1 'SourceDatabaseName', CONVERT(NVARCHAR, Task.SourceDatabaseName) FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey WHERE TaskAuditKey = @TaskAuditKey
+	--INSERT INTO @returnTable SELECT TOP 1 'SourceDatabaseName', CONVERT(NVARCHAR, Task.SourceDatabaseName) FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey WHERE TaskAuditKey = @TaskAuditKey
 	INSERT INTO @returnTable SELECT TOP 1 'SourceSchemaName', CONVERT(NVARCHAR, Task.SourceSchemaName) FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey WHERE TaskAuditKey = @TaskAuditKey
 	INSERT INTO @returnTable SELECT TOP 1 'SourceTableName', CONVERT(NVARCHAR, Task.SourceTableName) FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey WHERE TaskAuditKey = @TaskAuditKey
 	INSERT INTO @returnTable SELECT TOP 1 'AdvancedConfigName', CONVERT(NVARCHAR, Task.AdvancedConfigName) FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey WHERE TaskAuditKey = @TaskAuditKey
+
+	-- values off the Source record
+	SELECT @SourceName = (SELECT TOP 1 Task.SourceName FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey WHERE TaskAuditKey = @TaskAuditKey);
+
+	IF EXISTS (SELECT 1 FROM etl.Sources WHERE SourceName = @SourceName)
+	BEGIN
+		INSERT INTO @ReturnTable
+			(Token, LiteralValue)
+		SELECT 
+			U.Token, U.LiteralValue
+		FROM 
+			(SELECT * FROM etl.Sources WHERE SourceName = @SourceName) as S
+			UNPIVOT (LiteralValue FOR Token IN (AuthenticationType, UserName, IntegrationRuntimeName, ConnectionStringSecret, PasswordSecret)) as U
+	END
 
 	-- replace null with some sort of string value
 	UPDATE @returnTable SET LiteralValue = ISNULL(LiteralValue, 'NULL')
