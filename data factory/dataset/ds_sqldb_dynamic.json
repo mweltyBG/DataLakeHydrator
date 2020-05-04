@@ -1,0 +1,25 @@
+{
+	"name": "ds_sqldb_dynamic",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_onprem_sql_dynamic",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"kv_secret_name": {
+					"value": "@dataset().kv-connectionstring",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"kv-connectionstring": {
+				"type": "string",
+				"defaultValue": "kv-bgdatalakehydrator-adf-ls-onprem-sqlserver-david"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
