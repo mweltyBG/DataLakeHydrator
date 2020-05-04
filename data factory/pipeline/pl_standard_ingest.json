@@ -149,7 +149,7 @@
 											"referenceName": "ds_sqldb_dynamic",
 											"type": "DatasetReference",
 											"parameters": {
-												"kv-connectionstring": {
+												"KVConnectionString": {
 													"value": "@pipeline().parameters.KVConnectionStringSecretName",
 													"type": "Expression"
 												}

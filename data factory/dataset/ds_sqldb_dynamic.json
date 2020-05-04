@@ -6,13 +6,13 @@
 			"type": "LinkedServiceReference",
 			"parameters": {
 				"kv_secret_name": {
-					"value": "@dataset().kv-connectionstring",
+					"value": "@dataset().KVConnectionString",
 					"type": "Expression"
 				}
 			}
 		},
 		"parameters": {
-			"kv-connectionstring": {
+			"KVConnectionString": {
 				"type": "string",
 				"defaultValue": "kv-bgdatalakehydrator-adf-ls-onprem-sqlserver-david"
 			}
