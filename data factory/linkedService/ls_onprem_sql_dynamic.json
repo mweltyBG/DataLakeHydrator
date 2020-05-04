@@ -1,6 +1,13 @@
 {
 	"name": "ls_onprem_sql_dynamic",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
 	"properties": {
+		"parameters": {
+			"kv_secret_name": {
+				"type": "string",
+				"defaultValue": "kv-bgdatalakehydrator-adf-ls-onprem-sqlserver-david"
+			}
+		},
 		"annotations": [],
 		"type": "SqlServer",
 		"typeProperties": {
@@ -10,13 +17,17 @@
 					"referenceName": "ls_keyvault",
 					"type": "LinkedServiceReference"
 				},
-				"secretName": "kv-bgdatalakehydrator-adf-ls-onprem-sqlserver-david"
+				"secretName": "@linkedService().kv_secret_name"
+			},
+			"userName": "dummy",
+			"password": {
+				"type": "SecureString",
+				"value": "**********"
 			}
 		},
 		"connectVia": {
 			"referenceName": "ir-onprem-01",
 			"type": "IntegrationRuntimeReference"
 		}
-	},
-	"type": "Microsoft.DataFactory/factories/linkedservices"
+	}
 }
