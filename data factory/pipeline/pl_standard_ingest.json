@@ -146,8 +146,14 @@
 									},
 									"inputs": [
 										{
-											"referenceName": "ds_sqldb_david_dynamic",
-											"type": "DatasetReference"
+											"referenceName": "ds_sqldb_dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"kv-connectionstring": {
+													"value": "@pipeline().parameters.KVConnectionStringSecretName",
+													"type": "Expression"
+												}
+											}
 										}
 									],
 									"outputs": [
