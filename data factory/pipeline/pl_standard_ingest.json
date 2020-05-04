@@ -1,635 +1,639 @@
 {
-    "name": "pl_standard_ingest",
-    "properties": {
-        "description": "Performs the data ingestion from the source system. Optionally loads several other areas of the data lake.\n\nData can either be ingested into a transient landing area or directly into the persisted raw area.\n\nIt can also optionally be loaded into the curated area. ",
-        "activities": [
-            {
-                "name": "Get_TaskQuery",
-                "type": "Lookup",
-                "dependsOn": [
-                    {
-                        "activity": "SetLimitAuditInfo_Pre",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "7.00:00:00",
-                    "retry": 0,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "source": {
-                        "type": "AzureSqlSource",
-                        "sqlReaderStoredProcedureName": "[etl].[GetTaskQuery]",
-                        "storedProcedureParameters": {
-                            "ETLExtractDatetime": {
-                                "type": "DateTime",
-                                "value": {
-                                    "value": "@pipeline().TriggerTime",
-                                    "type": "Expression"
-                                }
-                            },
-                            "TaskAuditKey": {
-                                "type": "Int32",
-                                "value": {
-                                    "value": "@pipeline().parameters.TaskAuditKey",
-                                    "type": "Expression"
-                                }
-                            },
-                            "TaskKey": {
-                                "type": "Int32",
-                                "value": {
-                                    "value": "@activity('Get_Task_Info').output.firstRow.TaskKey",
-                                    "type": "Expression"
-                                }
-                            }
-                        }
-                    },
-                    "dataset": {
-                        "referenceName": "ds_azure_sql_etlcontrol",
-                        "type": "DatasetReference"
-                    },
-                    "firstRowOnly": true
-                }
-            },
-            {
-                "name": "end_audit",
-                "type": "SqlServerStoredProcedure",
-                "dependsOn": [
-                    {
-                        "activity": "SetLimitAuditInfo_Post",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "7.00:00:00",
-                    "retry": 0,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "storedProcedureName": "[etl].[TaskAuditSuccess]",
-                    "storedProcedureParameters": {
-                        "TaskAuditKey": {
-                            "value": {
-                                "value": "@pipeline().parameters.TaskAuditKey",
-                                "type": "Expression"
-                            },
-                            "type": "Int32"
-                        }
-                    }
-                },
-                "linkedServiceName": {
-                    "referenceName": "ls_azure_sqldb_etlcontrol",
-                    "type": "LinkedServiceReference"
-                }
-            },
-            {
-                "name": "ingest_from_source",
-                "description": "based on the type of source DB, execute the proper \"Copy Data\" activity. This is not parameterized because the sink for a \"Copy Data\" activity cannot be parameterized. Execute the SetLimitAuditInfo stored proc both before and after the Copy Data activity. If this is not an incremental ADFActionKey, then this stored proc will do nothing.",
-                "type": "Switch",
-                "dependsOn": [
-                    {
-                        "activity": "Get_TaskQuery",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "userProperties": [],
-                "typeProperties": {
-                    "on": {
-                        "value": "@activity('Get_Task_Info').output.firstRow.SourceType",
-                        "type": "Expression"
-                    },
-                    "cases": [
-                        {
-                            "value": "SQL",
-                            "activities": [
-                                {
-                                    "name": "ingest_sql",
-                                    "type": "Copy",
-                                    "dependsOn": [],
-                                    "policy": {
-                                        "timeout": "7.00:00:00",
-                                        "retry": 0,
-                                        "retryIntervalInSeconds": 30,
-                                        "secureOutput": false,
-                                        "secureInput": false
-                                    },
-                                    "userProperties": [],
-                                    "typeProperties": {
-                                        "source": {
-                                            "type": "SqlServerSource",
-                                            "sqlReaderQuery": {
-                                                "value": "@activity('Get_TaskQuery').output.firstRow.SourceQuery",
-                                                "type": "Expression"
-                                            },
-                                            "queryTimeout": "02:00:00"
-                                        },
-                                        "sink": {
-                                            "type": "ParquetSink",
-                                            "storeSettings": {
-                                                "type": "AzureBlobFSWriteSettings"
-                                            }
-                                        },
-                                        "enableStaging": false
-                                    },
-                                    "inputs": [
-                                        {
-                                            "referenceName": "ds_sqldb_david_dynamic",
-                                            "type": "DatasetReference"
-                                        }
-                                    ],
-                                    "outputs": [
-                                        {
-                                            "referenceName": "ds_azure_datalake_parquet_dynamic",
-                                            "type": "DatasetReference",
-                                            "parameters": {
-                                                "FileSystem": {
-                                                    "value": "@variables('DataLakeInitialContainer')",
-                                                    "type": "Expression"
-                                                },
-                                                "Directory": {
-                                                    "value": "@variables('DataLakeInitialFolder')",
-                                                    "type": "Expression"
-                                                },
-                                                "File": {
-                                                    "value": "@variables('DataLakeInitialFileName')",
-                                                    "type": "Expression"
-                                                },
-                                                "CompressionType": {
-                                                    "value": "@variables('DataLakeInitialFileCompressionType')",
-                                                    "type": "Expression"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                },
-                                {
-                                    "name": "set_RowsCopied_sql",
-                                    "type": "SetVariable",
-                                    "dependsOn": [
-                                        {
-                                            "activity": "ingest_sql",
-                                            "dependencyConditions": [
-                                                "Succeeded"
-                                            ]
-                                        }
-                                    ],
-                                    "userProperties": [],
-                                    "typeProperties": {
-                                        "variableName": "RowsCopied",
-                                        "value": {
-                                            "value": "@string(activity('ingest_sql').output.rowsCopied)",
-                                            "type": "Expression"
-                                        }
-                                    }
-                                },
-                                {
-                                    "name": "set_RowsRead_sql",
-                                    "type": "SetVariable",
-                                    "dependsOn": [
-                                        {
-                                            "activity": "set_RowsCopied_sql",
-                                            "dependencyConditions": [
-                                                "Succeeded"
-                                            ]
-                                        }
-                                    ],
-                                    "userProperties": [],
-                                    "typeProperties": {
-                                        "variableName": "RowsRead",
-                                        "value": {
-                                            "value": "@string(activity('ingest_sql').output.rowsRead)",
-                                            "type": "Expression"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    ]
-                }
-            },
-            {
-                "name": "SetLimitAuditInfo_Pre",
-                "type": "SqlServerStoredProcedure",
-                "dependsOn": [
-                    {
-                        "activity": "Set_DataLakeInitialContainer",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    },
-                    {
-                        "activity": "Set_DataLakeInitialFolder",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    },
-                    {
-                        "activity": "Set_DataLakeInitialFileName",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    },
-                    {
-                        "activity": "Set_DataLakeInitialFileCompression",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "7.00:00:00",
-                    "retry": 0,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "storedProcedureName": "[etl].[SetLimitAuditInfo]",
-                    "storedProcedureParameters": {
-                        "ExecutionSequence": {
-                            "value": "Pre",
-                            "type": "String"
-                        },
-                        "TaskAuditKey": {
-                            "value": {
-                                "value": "@pipeline().parameters.TaskAuditKey",
-                                "type": "Expression"
-                            },
-                            "type": "Int64"
-                        },
-                        "TaskKey": {
-                            "value": {
-                                "value": "@activity('Get_Task_Info').output.firstRow.TaskKey",
-                                "type": "Expression"
-                            },
-                            "type": "Int32"
-                        }
-                    }
-                },
-                "linkedServiceName": {
-                    "referenceName": "ls_azure_sqldb_etlcontrol",
-                    "type": "LinkedServiceReference"
-                }
-            },
-            {
-                "name": "SetLimitAuditInfo_Post",
-                "type": "SqlServerStoredProcedure",
-                "dependsOn": [
-                    {
-                        "activity": "If_LandingAreaToRaw_Enabled",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "7.00:00:00",
-                    "retry": 0,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "storedProcedureName": "[etl].[SetLimitAuditInfo]",
-                    "storedProcedureParameters": {
-                        "TaskKey": {
-                            "value": {
-                                "value": "@activity('Get_Task_Info').output.firstRow.TaskKey",
-                                "type": "Expression"
-                            },
-                            "type": "Int32"
-                        },
-                        "TaskAuditKey": {
-                            "value": {
-                                "value": "@pipeline().parameters.TaskAuditKey",
-                                "type": "Expression"
-                            },
-                            "type": "Int64"
-                        },
-                        "ExecutionSequence": {
-                            "value": "Post",
-                            "type": "String"
-                        }
-                    }
-                },
-                "linkedServiceName": {
-                    "referenceName": "ls_azure_sqldb_etlcontrol",
-                    "type": "LinkedServiceReference"
-                }
-            },
-            {
-                "name": "Get_Task_Info",
-                "type": "Lookup",
-                "dependsOn": [],
-                "policy": {
-                    "timeout": "7.00:00:00",
-                    "retry": 0,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "source": {
-                        "type": "AzureSqlSource",
-                        "sqlReaderStoredProcedureName": "[etl].[GetTaskInfo]",
-                        "storedProcedureParameters": {
-                            "TaskAuditKey": {
-                                "type": "Int32",
-                                "value": {
-                                    "value": "@pipeline().parameters.TaskAuditKey",
-                                    "type": "Expression"
-                                }
-                            }
-                        },
-                        "queryTimeout": "02:00:00"
-                    },
-                    "dataset": {
-                        "referenceName": "ds_azure_sql_etlcontrol",
-                        "type": "DatasetReference"
-                    }
-                }
-            },
-            {
-                "name": "Set_LoadRawFromLandingZone",
-                "description": "This boolean variable controls whether the package will attempt to first load a landing zone and then subsequently copy the data into the persisted raw area",
-                "type": "SetVariable",
-                "dependsOn": [
-                    {
-                        "activity": "Set_LoadLandingArea",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "userProperties": [],
-                "typeProperties": {
-                    "variableName": "LoadRawFromLandingArea",
-                    "value": {
-                        "value": "@if(or(not(variables('LoadLandingArea')), empty(activity('Get_Task_Info').output.firstRow.PersistedRawContainer)), false, true)",
-                        "type": "Expression"
-                    }
-                }
-            },
-            {
-                "name": "Set_DataLakeInitialContainer",
-                "description": "This variable holds the name of the container that the data will be first placed within the data lake (either transient landing area or persisted raw)",
-                "type": "SetVariable",
-                "dependsOn": [
-                    {
-                        "activity": "Set_LoadRawFromLandingZone",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "userProperties": [],
-                "typeProperties": {
-                    "variableName": "DataLakeInitialContainer",
-                    "value": {
-                        "value": "@if(variables('LoadLandingArea'), activity('Get_Task_Info').output.firstRow.TransientLandingAreaContainer, activity('Get_Task_Info').output.firstRow.PersistedRawContainer)",
-                        "type": "Expression"
-                    }
-                }
-            },
-            {
-                "name": "Set_DataLakeInitialFolder",
-                "description": "This variable holds the name of the folder that the data will be first placed within the data lake (either transient landing area or persisted raw)",
-                "type": "SetVariable",
-                "dependsOn": [
-                    {
-                        "activity": "Set_LoadRawFromLandingZone",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "userProperties": [],
-                "typeProperties": {
-                    "variableName": "DataLakeInitialFolder",
-                    "value": {
-                        "value": "@if(variables('LoadLandingArea'), activity('Get_Task_Info').output.firstRow.TransientLandingAreaFolder, activity('Get_Task_Info').output.firstRow.PersistedRawFolder)",
-                        "type": "Expression"
-                    }
-                }
-            },
-            {
-                "name": "Set_DataLakeInitialFileName",
-                "description": "This variable holds the name of the filename that the data will be first placed within the data lake (either transient landing area or persisted raw)",
-                "type": "SetVariable",
-                "dependsOn": [
-                    {
-                        "activity": "Set_LoadRawFromLandingZone",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "userProperties": [],
-                "typeProperties": {
-                    "variableName": "DataLakeInitialFileName",
-                    "value": {
-                        "value": "@if(variables('LoadLandingArea'), activity('Get_Task_Info').output.firstRow.TransientLandingAreaFileName, activity('Get_Task_Info').output.firstRow.PersistedRawFileName)",
-                        "type": "Expression"
-                    }
-                }
-            },
-            {
-                "name": "Set_DataLakeInitialFileCompression",
-                "description": "This variable holds the name of the flie compression that we will use when the data is first placed within the data lake (either transient landing area or persisted raw)",
-                "type": "SetVariable",
-                "dependsOn": [
-                    {
-                        "activity": "Set_LoadRawFromLandingZone",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "userProperties": [],
-                "typeProperties": {
-                    "variableName": "DataLakeInitialFileCompressionType",
-                    "value": {
-                        "value": "@if(variables('LoadLandingArea'), activity('Get_Task_Info').output.firstRow.TransientLandingAreaFileCompressionType, activity('Get_Task_Info').output.firstRow.PersistedRawFileCompressionType)",
-                        "type": "Expression"
-                    }
-                }
-            },
-            {
-                "name": "Set_LoadLandingArea",
-                "description": "Sets the variable that determines whether data first hits a transient landing area or if it goes straight into a persisted raw area",
-                "type": "SetVariable",
-                "dependsOn": [
-                    {
-                        "activity": "Get_Task_Info",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "userProperties": [],
-                "typeProperties": {
-                    "variableName": "LoadLandingArea",
-                    "value": {
-                        "value": "@if(empty(activity('Get_Task_Info').output.firstRow.TransientLandingAreaContainer), false, true)",
-                        "type": "Expression"
-                    }
-                }
-            },
-            {
-                "name": "If_LandingAreaToRaw_Enabled",
-                "description": "If both the Landing Area and Persisted Raw locations have been specified, then immediately copy this data that was just landed into the raw area",
-                "type": "IfCondition",
-                "dependsOn": [
-                    {
-                        "activity": "ingest_from_source",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "userProperties": [],
-                "typeProperties": {
-                    "expression": {
-                        "value": "@variables('LoadRawFromLandingArea')",
-                        "type": "Expression"
-                    },
-                    "ifTrueActivities": [
-                        {
-                            "name": "copy_landingarea_to_raw",
-                            "type": "Copy",
-                            "dependsOn": [],
-                            "policy": {
-                                "timeout": "7.00:00:00",
-                                "retry": 0,
-                                "retryIntervalInSeconds": 30,
-                                "secureOutput": false,
-                                "secureInput": false
-                            },
-                            "userProperties": [],
-                            "typeProperties": {
-                                "source": {
-                                    "type": "ParquetSource",
-                                    "storeSettings": {
-                                        "type": "AzureBlobFSReadSettings",
-                                        "recursive": true
-                                    }
-                                },
-                                "sink": {
-                                    "type": "ParquetSink",
-                                    "storeSettings": {
-                                        "type": "AzureBlobFSWriteSettings"
-                                    }
-                                },
-                                "enableStaging": false
-                            },
-                            "inputs": [
-                                {
-                                    "referenceName": "ds_azure_datalake_parquet_dynamic",
-                                    "type": "DatasetReference",
-                                    "parameters": {
-                                        "FileSystem": {
-                                            "value": "@activity('Get_Task_Info').output.firstRow.TransientLandingAreaContainer",
-                                            "type": "Expression"
-                                        },
-                                        "Directory": {
-                                            "value": "@activity('Get_Task_Info').output.firstRow.TransientLandingAreaFolder",
-                                            "type": "Expression"
-                                        },
-                                        "File": {
-                                            "value": "@activity('Get_Task_Info').output.firstRow.TransientLandingAreaFileName",
-                                            "type": "Expression"
-                                        },
-                                        "CompressionType": {
-                                            "value": "@activity('Get_Task_Info').output.firstRow.TransientLandingAreaFileCompressionType",
-                                            "type": "Expression"
-                                        }
-                                    }
-                                }
-                            ],
-                            "outputs": [
-                                {
-                                    "referenceName": "ds_azure_datalake_parquet_dynamic",
-                                    "type": "DatasetReference",
-                                    "parameters": {
-                                        "FileSystem": {
-                                            "value": "@activity('Get_Task_Info').output.firstRow.PersistedRawContainer",
-                                            "type": "Expression"
-                                        },
-                                        "Directory": {
-                                            "value": "@activity('Get_Task_Info').output.firstRow.PersistedRawFolder",
-                                            "type": "Expression"
-                                        },
-                                        "File": {
-                                            "value": "@activity('Get_Task_Info').output.firstRow.PersistedRawFileName",
-                                            "type": "Expression"
-                                        },
-                                        "CompressionType": {
-                                            "value": "@activity('Get_Task_Info').output.firstRow.PersistedRawFileCompressionType",
-                                            "type": "Expression"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    ]
-                }
-            }
-        ],
-        "parameters": {
-            "TaskAuditKey": {
-                "type": "int",
-                "defaultValue": 1
-            }
-        },
-        "variables": {
-            "RowsCopied": {
-                "type": "String",
-                "defaultValue": "0"
-            },
-            "RowsRead": {
-                "type": "String",
-                "defaultValue": "0"
-            },
-            "TaskKey": {
-                "type": "String",
-                "defaultValue": "0"
-            },
-            "DataLakeInitialContainer": {
-                "type": "String"
-            },
-            "DataLakeInitialFolder": {
-                "type": "String"
-            },
-            "DataLakeInitialFileName": {
-                "type": "String"
-            },
-            "LoadRawFromLandingArea": {
-                "type": "Boolean"
-            },
-            "DataLakeInitialFileCompressionType": {
-                "type": "String"
-            },
-            "LoadLandingArea": {
-                "type": "Boolean"
-            }
-        },
-        "annotations": []
-    },
-    "type": "Microsoft.DataFactory/factories/pipelines"
+	"name": "pl_standard_ingest",
+	"properties": {
+		"description": "Performs the data ingestion from the source system. Optionally loads several other areas of the data lake.\n\nData can either be ingested into a transient landing area or directly into the persisted raw area.\n\nIt can also optionally be loaded into the curated area. ",
+		"activities": [
+			{
+				"name": "Get_TaskQuery",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "SetLimitAuditInfo_Pre",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[etl].[GetTaskQuery]",
+						"storedProcedureParameters": {
+							"ETLExtractDatetime": {
+								"type": "DateTime",
+								"value": {
+									"value": "@pipeline().TriggerTime",
+									"type": "Expression"
+								}
+							},
+							"TaskAuditKey": {
+								"type": "Int32",
+								"value": {
+									"value": "@pipeline().parameters.TaskAuditKey",
+									"type": "Expression"
+								}
+							},
+							"TaskKey": {
+								"type": "Int32",
+								"value": {
+									"value": "@activity('Get_Task_Info').output.firstRow.TaskKey",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					"dataset": {
+						"referenceName": "ds_azure_sql_etlcontrol",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": true
+				}
+			},
+			{
+				"name": "end_audit",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "SetLimitAuditInfo_Post",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[etl].[TaskAuditSuccess]",
+					"storedProcedureParameters": {
+						"TaskAuditKey": {
+							"value": {
+								"value": "@pipeline().parameters.TaskAuditKey",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_azure_sqldb_etlcontrol",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "ingest_from_source",
+				"description": "based on the type of source DB, execute the proper \"Copy Data\" activity. This is not parameterized because the sink for a \"Copy Data\" activity cannot be parameterized. Execute the SetLimitAuditInfo stored proc both before and after the Copy Data activity. If this is not an incremental ADFActionKey, then this stored proc will do nothing.",
+				"type": "Switch",
+				"dependsOn": [
+					{
+						"activity": "Get_TaskQuery",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"on": {
+						"value": "@activity('Get_Task_Info').output.firstRow.SourceType",
+						"type": "Expression"
+					},
+					"cases": [
+						{
+							"value": "SQL",
+							"activities": [
+								{
+									"name": "ingest_sql",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "SqlServerSource",
+											"sqlReaderQuery": {
+												"value": "@activity('Get_TaskQuery').output.firstRow.SourceQuery",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "ds_sqldb_david_dynamic",
+											"type": "DatasetReference"
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ds_azure_datalake_parquet_dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileSystem": {
+													"value": "@variables('DataLakeInitialContainer')",
+													"type": "Expression"
+												},
+												"Directory": {
+													"value": "@variables('DataLakeInitialFolder')",
+													"type": "Expression"
+												},
+												"File": {
+													"value": "@variables('DataLakeInitialFileName')",
+													"type": "Expression"
+												},
+												"CompressionType": {
+													"value": "@variables('DataLakeInitialFileCompressionType')",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "set_RowsCopied_sql",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "ingest_sql",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "RowsCopied",
+										"value": {
+											"value": "@string(activity('ingest_sql').output.rowsCopied)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "set_RowsRead_sql",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "set_RowsCopied_sql",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "RowsRead",
+										"value": {
+											"value": "@string(activity('ingest_sql').output.rowsRead)",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "SetLimitAuditInfo_Pre",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Set_DataLakeInitialContainer",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set_DataLakeInitialFolder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set_DataLakeInitialFileName",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set_DataLakeInitialFileCompression",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[etl].[SetLimitAuditInfo]",
+					"storedProcedureParameters": {
+						"ExecutionSequence": {
+							"value": "Pre",
+							"type": "String"
+						},
+						"TaskAuditKey": {
+							"value": {
+								"value": "@pipeline().parameters.TaskAuditKey",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"TaskKey": {
+							"value": {
+								"value": "@activity('Get_Task_Info').output.firstRow.TaskKey",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_azure_sqldb_etlcontrol",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "SetLimitAuditInfo_Post",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "If_LandingAreaToRaw_Enabled",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[etl].[SetLimitAuditInfo]",
+					"storedProcedureParameters": {
+						"TaskKey": {
+							"value": {
+								"value": "@activity('Get_Task_Info').output.firstRow.TaskKey",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"TaskAuditKey": {
+							"value": {
+								"value": "@pipeline().parameters.TaskAuditKey",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"ExecutionSequence": {
+							"value": "Post",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_azure_sqldb_etlcontrol",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Get_Task_Info",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[etl].[GetTaskInfo]",
+						"storedProcedureParameters": {
+							"TaskAuditKey": {
+								"type": "Int32",
+								"value": {
+									"value": "@pipeline().parameters.TaskAuditKey",
+									"type": "Expression"
+								}
+							}
+						},
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "ds_azure_sql_etlcontrol",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "Set_LoadRawFromLandingZone",
+				"description": "This boolean variable controls whether the package will attempt to first load a landing zone and then subsequently copy the data into the persisted raw area",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set_LoadLandingArea",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "LoadRawFromLandingArea",
+					"value": {
+						"value": "@if(or(not(variables('LoadLandingArea')), empty(activity('Get_Task_Info').output.firstRow.PersistedRawContainer)), false, true)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set_DataLakeInitialContainer",
+				"description": "This variable holds the name of the container that the data will be first placed within the data lake (either transient landing area or persisted raw)",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set_LoadRawFromLandingZone",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "DataLakeInitialContainer",
+					"value": {
+						"value": "@if(variables('LoadLandingArea'), activity('Get_Task_Info').output.firstRow.TransientLandingAreaContainer, activity('Get_Task_Info').output.firstRow.PersistedRawContainer)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set_DataLakeInitialFolder",
+				"description": "This variable holds the name of the folder that the data will be first placed within the data lake (either transient landing area or persisted raw)",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set_LoadRawFromLandingZone",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "DataLakeInitialFolder",
+					"value": {
+						"value": "@if(variables('LoadLandingArea'), activity('Get_Task_Info').output.firstRow.TransientLandingAreaFolder, activity('Get_Task_Info').output.firstRow.PersistedRawFolder)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set_DataLakeInitialFileName",
+				"description": "This variable holds the name of the filename that the data will be first placed within the data lake (either transient landing area or persisted raw)",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set_LoadRawFromLandingZone",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "DataLakeInitialFileName",
+					"value": {
+						"value": "@if(variables('LoadLandingArea'), activity('Get_Task_Info').output.firstRow.TransientLandingAreaFileName, activity('Get_Task_Info').output.firstRow.PersistedRawFileName)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set_DataLakeInitialFileCompression",
+				"description": "This variable holds the name of the flie compression that we will use when the data is first placed within the data lake (either transient landing area or persisted raw)",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set_LoadRawFromLandingZone",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "DataLakeInitialFileCompressionType",
+					"value": {
+						"value": "@if(variables('LoadLandingArea'), activity('Get_Task_Info').output.firstRow.TransientLandingAreaFileCompressionType, activity('Get_Task_Info').output.firstRow.PersistedRawFileCompressionType)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set_LoadLandingArea",
+				"description": "Sets the variable that determines whether data first hits a transient landing area or if it goes straight into a persisted raw area",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get_Task_Info",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "LoadLandingArea",
+					"value": {
+						"value": "@if(empty(activity('Get_Task_Info').output.firstRow.TransientLandingAreaContainer), false, true)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "If_LandingAreaToRaw_Enabled",
+				"description": "If both the Landing Area and Persisted Raw locations have been specified, then immediately copy this data that was just landed into the raw area",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "ingest_from_source",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@variables('LoadRawFromLandingArea')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "copy_landingarea_to_raw",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "ParquetSource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true
+									}
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "ds_azure_datalake_parquet_dynamic",
+									"type": "DatasetReference",
+									"parameters": {
+										"FileSystem": {
+											"value": "@activity('Get_Task_Info').output.firstRow.TransientLandingAreaContainer",
+											"type": "Expression"
+										},
+										"Directory": {
+											"value": "@activity('Get_Task_Info').output.firstRow.TransientLandingAreaFolder",
+											"type": "Expression"
+										},
+										"File": {
+											"value": "@activity('Get_Task_Info').output.firstRow.TransientLandingAreaFileName",
+											"type": "Expression"
+										},
+										"CompressionType": {
+											"value": "@activity('Get_Task_Info').output.firstRow.TransientLandingAreaFileCompressionType",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ds_azure_datalake_parquet_dynamic",
+									"type": "DatasetReference",
+									"parameters": {
+										"FileSystem": {
+											"value": "@activity('Get_Task_Info').output.firstRow.PersistedRawContainer",
+											"type": "Expression"
+										},
+										"Directory": {
+											"value": "@activity('Get_Task_Info').output.firstRow.PersistedRawFolder",
+											"type": "Expression"
+										},
+										"File": {
+											"value": "@activity('Get_Task_Info').output.firstRow.PersistedRawFileName",
+											"type": "Expression"
+										},
+										"CompressionType": {
+											"value": "@activity('Get_Task_Info').output.firstRow.PersistedRawFileCompressionType",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"TaskAuditKey": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"KVConnectionStringSecretName": {
+				"type": "string",
+				"defaultValue": "kv-bgdatalakehydrator-adf-ls-onprem-sqlserver-mockerp"
+			}
+		},
+		"variables": {
+			"RowsCopied": {
+				"type": "String",
+				"defaultValue": "0"
+			},
+			"RowsRead": {
+				"type": "String",
+				"defaultValue": "0"
+			},
+			"TaskKey": {
+				"type": "String",
+				"defaultValue": "0"
+			},
+			"DataLakeInitialContainer": {
+				"type": "String"
+			},
+			"DataLakeInitialFolder": {
+				"type": "String"
+			},
+			"DataLakeInitialFileName": {
+				"type": "String"
+			},
+			"LoadRawFromLandingArea": {
+				"type": "Boolean"
+			},
+			"DataLakeInitialFileCompressionType": {
+				"type": "String"
+			},
+			"LoadLandingArea": {
+				"type": "Boolean"
+			}
+		},
+		"annotations": []
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
 }
