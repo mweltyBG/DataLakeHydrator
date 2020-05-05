@@ -247,11 +247,11 @@
 									},
 									"inputs": [
 										{
-											"referenceName": "azure_sql_dynamic",
+											"referenceName": "ds_azure_sqldb_dynamic",
 											"type": "DatasetReference",
 											"parameters": {
-												"KVConnectionString": {
-													"value": "@activity('Get_Task_Info').output.firstRow.SourceKVSecretName",
+												"KeyVaultSecretName": {
+													"value": "@activity('Get_Task_Info').output.firstRow.SourceKeyVaultSecretName",
 													"type": "Expression"
 												}
 											}
