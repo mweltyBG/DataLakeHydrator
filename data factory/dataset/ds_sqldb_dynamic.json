@@ -5,10 +5,7 @@
 			"referenceName": "ls_onprem_sql_dynamic",
 			"type": "LinkedServiceReference",
 			"parameters": {
-				"kv_secret_name": {
-					"value": "@dataset().KVConnectionString",
-					"type": "Expression"
-				}
+				"KVConnectionStringSecretName": "kv-bgdatalakehydrator-adf-ls-onprem-sqlserver-mockerp"
 			}
 		},
 		"parameters": {

@@ -604,7 +604,7 @@
 			},
 			"KVConnectionStringSecretName": {
 				"type": "string",
-				"defaultValue": "kv-bgdatalakehydrator-adf-ls-onprem-sqlserver-mockerp"
+				"defaultValue": "kv-bgdatalakehydrator-adf-ls-onprem-sqlserver-david"
 			}
 		},
 		"variables": {
