@@ -1,0 +1,63 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "adf-bgdatalakehydrator-dev"
+		},
+		"ls_onprem_sqlserver_david_connectionString": {
+			"value": ""
+		},
+		"ls_onprem_sqlserver_david_password": {
+			"value": ""
+		},
+		"ds_azure_datalake_staging_dynamic_properties_typeProperties_url": {
+			"value": "https://stbgdatalakehydrator001.dfs.core.windows.net"
+		},
+		"ls_azure_mysql_dynamic_properties_typeProperties_connectionString_secretName": {
+			"value": "@linkedService().KeyVaultSecretName"
+		},
+		"ls_azure_sqldb_dynamic_properties_typeProperties_connectionString_secretName": {
+			"value": "@linkedService().KeyVaultSecretName"
+		},
+		"ls_azure_sqldb_etlcontrol_properties_typeProperties_connectionString_secretName": {
+			"value": "kv-etlcontrol-connstr"
+		},
+		"ls_azure_sqldw_dynamic_properties_typeProperties_connectionString_secretName": {
+			"value": "@linkedService().KeyVaultSecretName"
+		},
+		"ls_keyvault_properties_typeProperties_baseUrl": {
+			"value": "https://BGKeyVaultDLH.vault.azure.net/"
+		},
+		"ls_onprem_mysql_dynamic_properties_typeProperties_connectionString_secretName": {
+			"value": "@linkedService().KeyVaultSecretName"
+		},
+		"ls_onprem_oracle_dynamic_properties_typeProperties_connectionString_secretName": {
+			"value": "@linkedService().KeyVaultSecretName"
+		},
+		"ls_onprem_sqlserver_david_properties_typeProperties_userName": {
+			"value": "DESKTOP-UER9G6V\\David"
+		},
+		"ls_onprem_sqlserver_dynamic_properties_typeProperties_connectionString_secretName": {
+			"value": "@linkedService().KeyVaultSecretName"
+		},
+		"ls_sqlserver_scardella_sql_properties_typeProperties_connectionString_secretName": {
+			"value": "kv-samplesourcesqlauth-connstr"
+		},
+		"ls_sqlserver_scardella_windows_properties_typeProperties_connectionString_secretName": {
+			"value": "kv-sourcesystem-connstr"
+		},
+		"ls_sqlserver_scardella_windows_properties_typeProperties_userName": {
+			"value": "SqlServer2017\\ADFWindowsUser"
+		},
+		"ir-scardella-onprem_properties_typeProperties_linkedInfo_resourceId": {
+			"value": "/subscriptions/3aa0c810-3bcb-407a-a221-5aa031eb390b/resourcegroups/Default-Web-CentralUS/providers/Microsoft.DataFactory/factories/ADFv2SSC/integrationruntimes/SQL2017VMIntegration"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}

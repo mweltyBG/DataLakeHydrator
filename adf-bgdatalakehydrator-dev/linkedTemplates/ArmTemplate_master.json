@@ -1,0 +1,174 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "adf-bgdatalakehydrator-dev"
+		},
+		"ls_onprem_sqlserver_david_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_onprem_sqlserver_david'"
+		},
+		"ls_onprem_sqlserver_david_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'ls_onprem_sqlserver_david'"
+		},
+		"ds_azure_datalake_staging_dynamic_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://stbgdatalakehydrator001.dfs.core.windows.net"
+		},
+		"ls_azure_mysql_dynamic_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "@linkedService().KeyVaultSecretName"
+		},
+		"ls_azure_sqldb_dynamic_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "@linkedService().KeyVaultSecretName"
+		},
+		"ls_azure_sqldb_etlcontrol_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "kv-etlcontrol-connstr"
+		},
+		"ls_azure_sqldw_dynamic_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "@linkedService().KeyVaultSecretName"
+		},
+		"ls_keyvault_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://BGKeyVaultDLH.vault.azure.net/"
+		},
+		"ls_onprem_mysql_dynamic_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "@linkedService().KeyVaultSecretName"
+		},
+		"ls_onprem_oracle_dynamic_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "@linkedService().KeyVaultSecretName"
+		},
+		"ls_onprem_sqlserver_david_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "DESKTOP-UER9G6V\\David"
+		},
+		"ls_onprem_sqlserver_dynamic_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "@linkedService().KeyVaultSecretName"
+		},
+		"ls_sqlserver_scardella_sql_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "kv-samplesourcesqlauth-connstr"
+		},
+		"ls_sqlserver_scardella_windows_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "kv-sourcesystem-connstr"
+		},
+		"ls_sqlserver_scardella_windows_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "SqlServer2017\\ADFWindowsUser"
+		},
+		"ir-scardella-onprem_properties_typeProperties_linkedInfo_resourceId": {
+			"type": "string",
+			"defaultValue": "/subscriptions/3aa0c810-3bcb-407a-a221-5aa031eb390b/resourcegroups/Default-Web-CentralUS/providers/Microsoft.DataFactory/factories/ADFv2SSC/integrationruntimes/SQL2017VMIntegration"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"ls_onprem_sqlserver_david_connectionString": {
+						"value": "[parameters('ls_onprem_sqlserver_david_connectionString')]"
+					},
+					"ls_onprem_sqlserver_david_password": {
+						"value": "[parameters('ls_onprem_sqlserver_david_password')]"
+					},
+					"ls_keyvault_properties_typeProperties_baseUrl": {
+						"value": "[parameters('ls_keyvault_properties_typeProperties_baseUrl')]"
+					},
+					"ir-scardella-onprem_properties_typeProperties_linkedInfo_resourceId": {
+						"value": "[parameters('ir-scardella-onprem_properties_typeProperties_linkedInfo_resourceId')]"
+					},
+					"ds_azure_datalake_staging_dynamic_properties_typeProperties_url": {
+						"value": "[parameters('ds_azure_datalake_staging_dynamic_properties_typeProperties_url')]"
+					},
+					"ls_azure_mysql_dynamic_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('ls_azure_mysql_dynamic_properties_typeProperties_connectionString_secretName')]"
+					},
+					"ls_azure_sqldb_dynamic_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('ls_azure_sqldb_dynamic_properties_typeProperties_connectionString_secretName')]"
+					},
+					"ls_azure_sqldb_etlcontrol_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('ls_azure_sqldb_etlcontrol_properties_typeProperties_connectionString_secretName')]"
+					},
+					"ls_azure_sqldw_dynamic_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('ls_azure_sqldw_dynamic_properties_typeProperties_connectionString_secretName')]"
+					},
+					"ls_onprem_mysql_dynamic_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('ls_onprem_mysql_dynamic_properties_typeProperties_connectionString_secretName')]"
+					},
+					"ls_onprem_oracle_dynamic_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('ls_onprem_oracle_dynamic_properties_typeProperties_connectionString_secretName')]"
+					},
+					"ls_onprem_sqlserver_david_properties_typeProperties_userName": {
+						"value": "[parameters('ls_onprem_sqlserver_david_properties_typeProperties_userName')]"
+					},
+					"ls_onprem_sqlserver_dynamic_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('ls_onprem_sqlserver_dynamic_properties_typeProperties_connectionString_secretName')]"
+					},
+					"ls_sqlserver_scardella_sql_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('ls_sqlserver_scardella_sql_properties_typeProperties_connectionString_secretName')]"
+					},
+					"ls_sqlserver_scardella_windows_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('ls_sqlserver_scardella_windows_properties_typeProperties_connectionString_secretName')]"
+					},
+					"ls_sqlserver_scardella_windows_properties_typeProperties_userName": {
+						"value": "[parameters('ls_sqlserver_scardella_windows_properties_typeProperties_userName')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_0')]"
+			]
+		}
+	]
+}
