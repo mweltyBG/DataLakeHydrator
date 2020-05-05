@@ -326,6 +326,18 @@
 									}
 								}
 							]
+						},
+						{
+							"value": "Azure SQLDW"
+						},
+						{
+							"value": "Azure MySQL"
+						},
+						{
+							"value": "Oracle"
+						},
+						{
+							"value": "MySQL"
 						}
 					]
 				}
