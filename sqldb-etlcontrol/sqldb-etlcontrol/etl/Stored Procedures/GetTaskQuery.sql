@@ -17,8 +17,6 @@ DECLARE @InsertDateTime DATETIME = '1900-01-01'
 -- Current SourceTypes supported are
 	-- "SQLServer": on-premise SQL database
 	-- "AzureSQL": Azure SQL Database
-	DECLARE @SupportedSourceTypes NVARCHAR(1000);
-	SET @SupportedSourceTypes = 'AzureSQL,SQLserver';
 
 	DECLARE @ErrorMessage NVARCHAR(2048) -- just declare this here. there are several spots later where we may attempt to use this
 
@@ -44,14 +42,8 @@ DECLARE @InsertDateTime DATETIME = '1900-01-01'
 	DECLARE @LimitType NVARCHAR(200) -- (optional but required for incremental) 
 	DECLARE @DisableAction BIT -- (optional) when set to true, disables this task
 
-	PRINT @SupportedSourceTypes
-	PRINT @SourceType
-
-
-
-
 	SELECT
-		@SourceType = ISNULL(SourceType, ''),
+		@SourceType = ISNULL(S.SourceType, 'SQLServer'),
 		--@SourceDatabaseName = ISNULL(SourceDatabaseName, ''), 
 		@SourceSchemaName = ISNULL(SourceSchemaName, ''), 
 		@SourceTableName = ISNULL(SourceTableName, ''),
@@ -72,15 +64,13 @@ DECLARE @InsertDateTime DATETIME = '1900-01-01'
 		@LimitType = ISNULL(LimitType, ''),
 		@DisableAction = DisableAction
 
-	FROM etl.Task
-	WHERE Task.TaskKey= @TaskKey
+	FROM 
+		etl.Task as T
+		LEFT JOIN etl.Sources as S
+			ON T.SourceName = S.SourceName
+	WHERE T.TaskKey= @TaskKey
 
-	IF (',' + @SupportedSourceTypes + ',') NOT LIKE '%,' + @SourceType + ',%'
-	BEGIN
-		SET @ErrorMessage =  'Error: SourceType "' + @SourceType + '" defined by TaskKey "' + CONVERT(VARCHAR(5), @TaskKey) + '" is not currently a supported SourceType. Supported SourceType options are: ' + @SupportedSourceTypes;
-		THROW 50000, @ErrorMessage, 1;
-	END
-	ELSE
+	
 	BEGIN
 
 		-- 	Begin constucting the source system query using all the prior options/input

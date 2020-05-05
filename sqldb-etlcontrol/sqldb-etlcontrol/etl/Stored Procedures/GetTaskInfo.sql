@@ -214,31 +214,31 @@ SELECT
 	Task.TaskKey,	
 
 	-- Source info
-	CASE 
-		WHEN Task.SourceType = 'AzureSQL' AND Sources.IntegrationRuntimeName <> ''
-		THEN Task.SourceType + '_' + Sources.IntegrationRuntimeName
-		WHEN Task.SourceType = 'AzureSQL'
-		THEN 'AzureSQL'
-		WHEN Task.SourceType = 'SQLServer' AND Sources.IntegrationRuntimeName <> '' AND Sources.AuthenticationType <> ''
-		THEN Task.SourceType + '_' + Sources.IntegrationRuntimeName + '_' + Sources.AuthenticationType
-		WHEN Task.SourceType = 'SQLServer' AND Sources.IntegrationRuntimeName <> ''
-		THEN Task.SourceType + '_' + Sources.IntegrationRuntimeName + '_SQL'
-		WHEN Task.SourceType = 'SQLServer' AND Sources.AuthenticationType <> ''
-		THEN Task.SourceType + '_' + Sources.AuthenticationType
-		WHEN Task.SourceType = 'SQLServer'
-		THEN Task.SourceType + '_SQL'
-		ELSE Task.SourceType
+	ISNULL(Sources.SourceType, 'SQLServer')
+	+ CASE 
+		WHEN Sources.IntegrationRuntimeName <> ''
+		THEN '_' + Sources.IntegrationRuntimeName
+		ELSE ''
+	END
+	+ CASE 
+		WHEN ISNULL(Sources.SourceType,'SQLServer') NOT IN ('SQLServer') THEN ''
+		WHEN Sources.AuthenticationType <> ''
+		THEN '_' + Sources.AuthenticationType
+		ELSE ''
 	END  as SourceType, -- see notes, this needs to match the switch statement
+	
 	ISNULL(Sources.ConnectionStringSecret, 'kv-' + Task.SourceName + '-connstr') as ConnectionStringSecret,
+	
 	CASE 
-		WHEN Task.SourceType = 'SQLServer' AND Sources.AuthenticationType = 'Windows' AND Sources.UserName <> ''
+		WHEN Sources.SourceType = 'SQLServer' AND Sources.AuthenticationType = 'Windows' AND Sources.UserName <> ''
 		THEN Sources.UserName
 		ELSE ''
 	END as UserName,
+	
 	CASE 
-		WHEN Task.SourceType = 'SQLServer' AND Sources.AuthenticationType = 'Windows' AND Sources.PasswordSecret <> ''
+		WHEN Sources.SourceType = 'SQLServer' AND Sources.AuthenticationType = 'Windows' AND Sources.PasswordSecret <> ''
 		THEN Sources.PasswordSecret
-		WHEN Task.SourceType = 'SQLServer' AND Sources.AuthenticationType = 'Windows'
+		WHEN Sources.SourceType = 'SQLServer' AND Sources.AuthenticationType = 'Windows'
 		THEN 'kv-' + Task.SourceName + '-passwd'
 		ELSE ''
 	END as PasswordSecret, -- This might not be necessary.  See notes above.
