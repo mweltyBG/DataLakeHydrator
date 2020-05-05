@@ -174,7 +174,76 @@
 							]
 						},
 						{
-							"value": "Azure SQLDB"
+							"value": "Azure SQLDB",
+							"activities": [
+								{
+									"name": "ingest_azure_sqldb",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink"
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "azure_sql_dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"KVConnectionString": {
+													"value": "@activity('Get_Task_Info').output.firstRow.SourceKVSecretName",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ds_azure_datalake_parquet_dynamic",
+											"type": "DatasetReference"
+										}
+									]
+								},
+								{
+									"name": "set_RowsCopied_sql_copy1",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "RowsCopied",
+										"value": {
+											"value": "@string(activity('ingest_sql').output.rowsCopied)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "set_RowsRead_sql_copy1",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "RowsRead",
+										"value": {
+											"value": "@string(activity('ingest_sql').output.rowsRead)",
+											"type": "Expression"
+										}
+									}
+								}
+							]
 						}
 					]
 				}
