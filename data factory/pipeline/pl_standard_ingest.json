@@ -128,8 +128,55 @@
 									},
 									"userProperties": [],
 									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "@activity('Get_TaskQuery').output.firstRow.SourceQuery",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink"
+										},
 										"enableStaging": false
-									}
+									},
+									"inputs": [
+										{
+											"referenceName": "azure_sql_dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"KVConnectionString": {
+													"value": "@activity('Get_Task_Info').output.firstRow.SourceKVSecretName",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ds_azure_datalake_parquet_dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileSystem": {
+													"value": "@variables('DataLakeInitialContainer')",
+													"type": "Expression"
+												},
+												"Directory": {
+													"value": "@variables('DataLakeInitialFolder')",
+													"type": "Expression"
+												},
+												"File": {
+													"value": "@variables('DataLakeInitialFileName')",
+													"type": "Expression"
+												},
+												"CompressionType": {
+													"value": "@variables('DataLakeInitialFileCompressionType')",
+													"type": "Expression"
+												}
+											}
+										}
+									]
 								},
 								{
 									"name": "set_RowsCopied_sql",
@@ -191,6 +238,10 @@
 									"typeProperties": {
 										"source": {
 											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "@activity('Get_TaskQuery').output.firstRow.SourceQuery",
+												"type": "Expression"
+											},
 											"queryTimeout": "02:00:00"
 										},
 										"sink": {
@@ -213,32 +264,64 @@
 									"outputs": [
 										{
 											"referenceName": "ds_azure_datalake_parquet_dynamic",
-											"type": "DatasetReference"
+											"type": "DatasetReference",
+											"parameters": {
+												"FileSystem": {
+													"value": "@variables('DataLakeInitialContainer')",
+													"type": "Expression"
+												},
+												"Directory": {
+													"value": "@variables('DataLakeInitialFolder')",
+													"type": "Expression"
+												},
+												"File": {
+													"value": "@variables('DataLakeInitialFileName')",
+													"type": "Expression"
+												},
+												"CompressionType": {
+													"value": "@variables('DataLakeInitialFileCompressionType')",
+													"type": "Expression"
+												}
+											}
 										}
 									]
 								},
 								{
-									"name": "set_RowsCopied_sql_copy1",
+									"name": "set_RowsCopied_azure_sqldb",
 									"type": "SetVariable",
-									"dependsOn": [],
+									"dependsOn": [
+										{
+											"activity": "ingest_azure_sqldb",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "RowsCopied",
 										"value": {
-											"value": "@string(activity('ingest_sql').output.rowsCopied)",
+											"value": "@string(activity('ingest_azure_sqldb').output.rowsCopied)",
 											"type": "Expression"
 										}
 									}
 								},
 								{
-									"name": "set_RowsRead_sql_copy1",
+									"name": "set_RowsRead_azure_sqldb",
 									"type": "SetVariable",
-									"dependsOn": [],
+									"dependsOn": [
+										{
+											"activity": "set_RowsCopied_azure_sqldb",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "RowsRead",
 										"value": {
-											"value": "@string(activity('ingest_sql').output.rowsRead)",
+											"value": "@string(activity('ingest_azure_sqldb').output.rowsRead)",
 											"type": "Expression"
 										}
 									}
