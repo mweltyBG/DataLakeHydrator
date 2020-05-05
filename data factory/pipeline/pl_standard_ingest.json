@@ -40,13 +40,6 @@
 									"value": "@pipeline().parameters.TaskAuditKey",
 									"type": "Expression"
 								}
-							},
-							"TaskKey": {
-								"type": "Int32",
-								"value": {
-									"value": "@activity('Get_Task_Info').output.firstRow.TaskKey",
-									"type": "Expression"
-								}
 							}
 						}
 					},
@@ -245,7 +238,10 @@
 											"queryTimeout": "02:00:00"
 										},
 										"sink": {
-											"type": "ParquetSink"
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											}
 										},
 										"enableStaging": false
 									},
