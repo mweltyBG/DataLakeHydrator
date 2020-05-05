@@ -1,0 +1,26 @@
+{
+	"name": "ls_azure_sqldb_dynamic",
+	"properties": {
+		"description": "Azure SQL Database",
+		"parameters": {
+			"KeyVaultSecretName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_keyvault",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": {
+					"value": "@linkedService().KeyVaultSecretName",
+					"type": "Expression"
+				}
+			}
+		}
+	}
+}
