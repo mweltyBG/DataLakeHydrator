@@ -1,5 +1,5 @@
 {
-	"name": "ds_sqlserver_scardella_windows",
+	"name": "ds_sqlserver_selfhosted_windows",
 	"properties": {
         "parameters": {
             "ConnectionSecretName": {
@@ -16,7 +16,7 @@
             }
         },
         "linkedServiceName": {
-			"referenceName": "ls_sqlserver_scardella_windows",
+			"referenceName": "ls_sqlserver_selfhosted_windows",
 			"type": "LinkedServiceReference",
 			"parameters": {
 				"ConnectionSecretName": {

@@ -146,7 +146,7 @@
                                     },
                                     "inputs": [
                                         {
-                                            "referenceName": "ds_sqlserver_scardella_sql",
+                                            "referenceName": "ds_sqlserver_selfhosted_sql",
                                             "type": "DatasetReference",
                                             "parameters": {
                                                 "ConnectionStringSecret": {
@@ -158,7 +158,7 @@
                                     ],
                                     "outputs": [
                                         {
-                                            "referenceName": "ds_azure_datalake_parquet_dynamic",
+                                            "referenceName": "ds_adlsv2_selfhosted_parquet",
                                             "type": "DatasetReference",
                                             "parameters": {
                                                 "FileSystem": {
@@ -257,7 +257,7 @@
                                     },
                                     "inputs": [
                                         {
-                                            "referenceName": "ds_sqlserver_scardella_windows",
+                                            "referenceName": "ds_sqlserver_selfhosted_windows",
                                             "type": "DatasetReference",
                                             "parameters": {
                                                 "ConnectionStringSecret": {
@@ -273,7 +273,7 @@
                                     ],
                                     "outputs": [
                                         {
-                                            "referenceName": "ds_azure_datalake_parquet_dynamic",
+                                            "referenceName": "ds_adlsv2_selfhosted_parquet",
                                             "type": "DatasetReference",
                                             "parameters": {
                                                 "FileSystem": {
@@ -384,7 +384,7 @@
                                     ],
                                     "outputs": [
                                         {
-                                            "referenceName": "ds_azure_datalake_parquet_dynamic",
+                                            "referenceName": "ds_adlsv2_autoresolveintegrationruntime_parquet",
                                             "type": "DatasetReference",
                                             "parameters": {
                                                 "FileSystem": {
@@ -772,7 +772,7 @@
                             },
                             "inputs": [
                                 {
-                                    "referenceName": "ds_azure_datalake_parquet_dynamic",
+                                    "referenceName": "ds_adlsv2_autoresolveintegrationruntime_parquet",
                                     "type": "DatasetReference",
                                     "parameters": {
                                         "FileSystem": {
@@ -796,7 +796,7 @@
                             ],
                             "outputs": [
                                 {
-                                    "referenceName": "ds_azure_datalake_parquet_dynamic",
+                                    "referenceName": "ds_adlsv2_autoresolveintegrationruntime_parquet",
                                     "type": "DatasetReference",
                                     "parameters": {
                                         "FileSystem": {

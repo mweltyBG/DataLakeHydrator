@@ -1,5 +1,5 @@
 {
-    "name": "ds_azure_datalake_staging_dynamic",
+    "name": "ls_adlsv2_autoresolveintegrationruntime",
     "properties": {
         "annotations": [],
         "type": "AzureBlobFS",

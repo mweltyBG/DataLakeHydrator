@@ -1,5 +1,5 @@
 {
-    "name": "ir-scardella-onprem",
+    "name": "ir-selfhosted-onprem",
     "properties": {
         "type": "SelfHosted",
         "typeProperties": {

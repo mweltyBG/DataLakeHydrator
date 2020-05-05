@@ -1,5 +1,5 @@
 {
-    "name": "ls_sqlserver_scardella_windows",
+    "name": "ls_sqlserver_selfhosted_windows",
     "properties": {
         "parameters": {
 			"ConnectionSecretName": {
@@ -46,7 +46,7 @@
             }
         },
         "connectVia": {
-            "referenceName": "ir-scardella-onprem",
+            "referenceName": "ir-selfhosted-onprem",
             "type": "IntegrationRuntimeReference"
         }
     }
