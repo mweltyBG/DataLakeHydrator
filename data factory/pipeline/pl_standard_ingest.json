@@ -146,7 +146,7 @@
 									},
 									"inputs": [
 										{
-											"referenceName": "ds_sqldb_dynamic",
+											"referenceName": "ds_onprem_sql_dynamic",
 											"type": "DatasetReference",
 											"parameters": {
 												"KVConnectionString": {

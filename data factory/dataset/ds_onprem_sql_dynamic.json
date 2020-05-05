@@ -1,5 +1,5 @@
 {
-	"name": "ds_sqldb_dynamic",
+	"name": "ds_onprem_sql_dynamic",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "ls_onprem_sql_dynamic",
