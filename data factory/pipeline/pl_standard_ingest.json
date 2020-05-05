@@ -128,58 +128,8 @@
 									},
 									"userProperties": [],
 									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"sqlReaderQuery": {
-												"value": "@activity('Get_TaskQuery').output.firstRow.SourceQuery",
-												"type": "Expression"
-											},
-											"queryTimeout": "02:00:00"
-										},
-										"sink": {
-											"type": "ParquetSink",
-											"storeSettings": {
-												"type": "AzureBlobFSWriteSettings"
-											}
-										},
 										"enableStaging": false
-									},
-									"inputs": [
-										{
-											"referenceName": "ds_onprem_sql_dynamic",
-											"type": "DatasetReference",
-											"parameters": {
-												"KVConnectionString": {
-													"value": "@activity('Get_Task_Info').output.firstRow.SourceKVSecretName",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "ds_azure_datalake_parquet_dynamic",
-											"type": "DatasetReference",
-											"parameters": {
-												"FileSystem": {
-													"value": "@variables('DataLakeInitialContainer')",
-													"type": "Expression"
-												},
-												"Directory": {
-													"value": "@variables('DataLakeInitialFolder')",
-													"type": "Expression"
-												},
-												"File": {
-													"value": "@variables('DataLakeInitialFileName')",
-													"type": "Expression"
-												},
-												"CompressionType": {
-													"value": "@variables('DataLakeInitialFileCompressionType')",
-													"type": "Expression"
-												}
-											}
-										}
-									]
+									}
 								},
 								{
 									"name": "set_RowsCopied_sql",
@@ -222,6 +172,9 @@
 									}
 								}
 							]
+						},
+						{
+							"value": "Azure SQLDB"
 						}
 					]
 				}
