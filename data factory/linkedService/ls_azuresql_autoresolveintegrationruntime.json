@@ -1,14 +1,14 @@
 {
-    "name": "ls_sqlserver_scardella_sql",
+    "name": "ls_azuresql_autoresolveintegrationruntime",
     "properties": {
         "parameters": {
 			"ConnectionSecretName": {
 				"type": "string",
-				"defaultValue": "kv-SampleSource-connstr"
-			}
-		},
+				"defaultValue": "kv-sourcesystem-connstr"
+            }
+        },
 		"annotations": [],
-        "type": "SqlServer",
+        "type": "AzureSqlDatabase",
         "typeProperties": {
             "connectionString": {
                 "type": "AzureKeyVaultSecret",
@@ -21,10 +21,7 @@
 					"type": "Expression"
 				}
             }
-        },
-        "connectVia": {
-            "referenceName": "ir-scardella-onprem",
-            "type": "IntegrationRuntimeReference"
         }
-    }
+    },
+    "type": "Microsoft.DataFactory/factories/linkedservices"
 }

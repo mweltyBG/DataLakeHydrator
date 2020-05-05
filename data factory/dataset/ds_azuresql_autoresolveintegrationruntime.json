@@ -1,0 +1,25 @@
+{
+	"name": "ds_azuresql_autoresolveintegrationruntime",
+	"properties": {
+        "parameters": {
+			"ConnectionSecretName": {
+				"type": "string",
+				"defaultValue": "kv-adflanding-connstr"
+            }
+        },
+        "linkedServiceName": {
+			"referenceName": "ls_azuresql_autoresolveintegrationruntime",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"ConnectionSecretName": {
+					"value": "@dataset().ConnectionSecretName",
+					"type": "Expression"
+				}
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
