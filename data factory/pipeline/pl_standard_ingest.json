@@ -109,7 +109,7 @@
 							"value": "SQL Server",
 							"activities": [
 								{
-									"name": "ingest_sql",
+									"name": "ingest_sql_server",
 									"type": "Copy",
 									"dependsOn": [],
 									"policy": {
@@ -175,11 +175,11 @@
 									]
 								},
 								{
-									"name": "set_RowsCopied_sql",
+									"name": "set_RowsCopied_sql_server",
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "ingest_sql",
+											"activity": "ingest_sql_server",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -189,17 +189,17 @@
 									"typeProperties": {
 										"variableName": "RowsCopied",
 										"value": {
-											"value": "@string(activity('ingest_sql').output.rowsCopied)",
+											"value": "@string(activity('ingest_sql_server').output.rowsCopied)",
 											"type": "Expression"
 										}
 									}
 								},
 								{
-									"name": "set_RowsRead_sql",
+									"name": "set_RowsRead_sql_server",
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "set_RowsCopied_sql",
+											"activity": "set_RowsCopied_sql_server",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -209,7 +209,7 @@
 									"typeProperties": {
 										"variableName": "RowsRead",
 										"value": {
-											"value": "@string(activity('ingest_sql').output.rowsRead)",
+											"value": "@string(activity('ingest_sql_server').output.rowsRead)",
 											"type": "Expression"
 										}
 									}
@@ -334,7 +334,116 @@
 							"value": "Azure MySQL"
 						},
 						{
-							"value": "Oracle"
+							"value": "Oracle",
+							"activities": [
+								{
+									"name": "ingest_oracle",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"oracleReaderQuery": {
+												"value": "@activity('Get_TaskQuery').output.firstRow.SourceQuery",
+												"type": "Expression"
+											},
+											"partitionOption": "None",
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "ds_onprem_oracle_dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"KeyVaultSecretName": {
+													"value": "@activity('Get_Task_Info').output.firstRow.SourceConnectionStringSecretName",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ds_azure_datalake_parquet_dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileSystem": {
+													"value": "@variables('DataLakeInitialContainer')",
+													"type": "Expression"
+												},
+												"Directory": {
+													"value": "@variables('DataLakeInitialFolder')",
+													"type": "Expression"
+												},
+												"File": {
+													"value": "@variables('DataLakeInitialFileName')",
+													"type": "Expression"
+												},
+												"CompressionType": {
+													"value": "@variables('DataLakeInitialFileCompressionType')",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "set_RowsCopied_oracle",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "ingest_oracle",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "RowsCopied",
+										"value": {
+											"value": "@string(activity('ingest_oracle').output.rowsCopied)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "set_RowsRead_oracle",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "set_RowsCopied_oracle",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "RowsRead",
+										"value": {
+											"value": "@string(activity('ingest_oracle').output.rowsRead)",
+											"type": "Expression"
+										}
+									}
+								}
+							]
 						},
 						{
 							"value": "MySQL"
