@@ -1,10 +1,6 @@
 {
 	"name": "ds_azure_datalake_parquet_dynamic",
 	"properties": {
-		"linkedServiceName": {
-			"referenceName": "ds_azure_datalake_staging_dynamic",
-			"type": "LinkedServiceReference"
-		},
 		"parameters": {
 			"FileSystem": {
 				"type": "string"
