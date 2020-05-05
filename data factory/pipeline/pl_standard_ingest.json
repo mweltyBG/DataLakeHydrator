@@ -122,7 +122,7 @@
 									"userProperties": [],
 									"typeProperties": {
 										"source": {
-											"type": "AzureSqlSource",
+											"type": "SqlServerSource",
 											"sqlReaderQuery": {
 												"value": "@activity('Get_TaskQuery').output.firstRow.SourceQuery",
 												"type": "Expression"
@@ -130,17 +130,20 @@
 											"queryTimeout": "02:00:00"
 										},
 										"sink": {
-											"type": "ParquetSink"
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											}
 										},
 										"enableStaging": false
 									},
 									"inputs": [
 										{
-											"referenceName": "azure_sql_dynamic",
+											"referenceName": "ds_onprem_sqlserver_dynamic",
 											"type": "DatasetReference",
 											"parameters": {
-												"KVConnectionString": {
-													"value": "@activity('Get_Task_Info').output.firstRow.SourceKVSecretName",
+												"KeyVaultSecretName": {
+													"value": "@activity('Get_Task_Info').output.firstRow.SourceKeyVaultSecretName",
 													"type": "Expression"
 												}
 											}
