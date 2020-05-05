@@ -1,25 +1,36 @@
 ﻿
+
+
 CREATE PROCEDURE [etl].[GetTaskQuery]
-(@TaskKey INT,
- @TaskAuditKey INT,
+(@TaskAuditKey INT,
  @ETLExtractDatetime DATETIME = NULL
 )
 AS
 	SET NOCOUNT ON
 
-/*
-DECLARE @TaskKey INT = 1
-DECLARE @TaskAuditKey INT = 1
-DECLARE @InsertDateTime DATETIME = '1900-01-01'
-*/
 
--- This constructs the query against the source database. One goal is to add additional "SourceType" database support.
--- Current SourceTypes supported are
-	-- "SQL": on-premise or Azure SQL database
-	DECLARE @SupportedSourceTypes NVARCHAR(1000)
-	SET @SupportedSourceTypes = 'SQL'
+
+--DECLARE @TaskAuditKey INT = 54
+--DECLARE @ETLExtractDatetime DATETIME = '1900-01-01'
 
 	DECLARE @ErrorMessage NVARCHAR(2048) -- just declare this here. there are several spots later where we may attempt to use this
+
+	DECLARE @TaskKey INT
+	SET @TaskKey = (SELECT TOP 1 TaskKey FROM etl.TaskAudit WHERE TaskAuditKey = @TaskAuditKey)
+	IF @TaskKey IS NULL
+	BEGIN
+		SET @ErrorMessage =  'Error: Could not find a TaskKey when searching the etl.TaskAudit table for TaskAuditKey ' + CONVERT(VARCHAR(5), @TaskAuditKey) + '.';
+		THROW 50000, @ErrorMessage, 1;
+	END
+
+-- This constructs the query against the source database. One goal is to add additional "SourceType" database support.
+-- Current SourceTypes supported are:
+	DECLARE @SupportedTypes TABLE (
+		SourceType NVARCHAR(200),
+		Description NVARCHAR(200)
+	)
+	INSERT INTO @SupportedTypes (SourceType, Description) VALUES ('SQL Server', 'on-premise SQL Server database')
+	INSERT INTO @SupportedTypes (SourceType, Description) VALUES ('Azure SQLDB', 'Azure SQL DB')
 
 -- The following are the incoming values that the stored procedure gathers from the etl.Task table:
 	DECLARE @SourceType NVARCHAR(200) -- (required) type of source system (see supported options above)
@@ -43,14 +54,8 @@ DECLARE @InsertDateTime DATETIME = '1900-01-01'
 	DECLARE @LimitType NVARCHAR(200) -- (optional but required for incremental) 
 	DECLARE @DisableAction BIT -- (optional) when set to true, disables this task
 
-	PRINT @SupportedSourceTypes
-	PRINT @SourceType
-
-
-
-
 	SELECT
-		@SourceType = ISNULL(SourceType, ''),
+		@SourceType = ISNULL(ConnectionConfig.ConnectionType, ''),
 		@SourceDatabaseName = ISNULL(SourceDatabaseName, ''), 
 		@SourceSchemaName = ISNULL(SourceSchemaName, ''), 
 		@SourceTableName = ISNULL(SourceTableName, ''),
@@ -59,24 +64,26 @@ DECLARE @InsertDateTime DATETIME = '1900-01-01'
 		@SourceQuery = ISNULL(SourceQuery, ''),
 		@SourceWhereClause = ISNULL(SourceWhereClause, ''),
 --		@SqlOverrideQuery = ISNULL(SqlOverrideQuery, ''),
-		@IsSelectDistinctFlag = IsSelectDistinctFlag,
+		@IsSelectDistinctFlag = ISNULL(IsSelectDistinctFlag, 0),
 --		@TargetDataLakeContainer = ISNULL(TargetDataLakeContainer, ''),
 --		@TargetDataLakeFolder = ISNULL(TargetDataLakeFolder, ''),
-		@IsIncrementalFlag = IsIncrementalFlag,
+		@IsIncrementalFlag = ISNULL(IsIncrementalFlag, 0),
 		@IncrementDatatype = ISNULL(IncrementDatatype, ''),
 --		@IncrementTableName = ISNULL(IncrementTableName, ''),
 		@IncrementColumnName = ISNULL(IncrementColumnName, ''),
 		@LowerLimit = ISNULL(LowerLimit, ''),
 		@UpperLimit = ISNULL(UpperLimit, ''),
 		@LimitType = ISNULL(LimitType, ''),
-		@DisableAction = DisableAction
+		@DisableAction = ISNULL(DisableAction, 0)
 
 	FROM etl.Task
+	LEFT OUTER JOIN etl.ConnectionConfig
+		ON Task.SourceName = ConnectionConfig.ConnectionName
 	WHERE Task.TaskKey= @TaskKey
 
-	IF @SupportedSourceTypes NOT LIKE '%' + @SourceType + '%'
+	IF @SourceType NOT IN (SELECT SourceType FROM @SupportedTypes)
 	BEGIN
-		SET @ErrorMessage =  'Error: SourceType "' + @SourceType + '" defined by TaskKey "' + CONVERT(VARCHAR(5), @TaskKey) + '" is not currently a supported SourceType. Supported SourceType options are: ' + @SupportedSourceTypes;
+		SET @ErrorMessage =  'Error: SourceType "' + @SourceType + '" defined by TaskKey "' + CONVERT(VARCHAR(5), @TaskKey) + '" is not currently a supported SourceType. Supported SourceType options are: ' + (SELECT STRING_AGG(SourceType, ', ') FROM @SupportedTypes);
 		THROW 50000, @ErrorMessage, 1;
 	END
 	ELSE
@@ -93,7 +100,7 @@ DECLARE @InsertDateTime DATETIME = '1900-01-01'
 			-- build a custom query based on all the supplied options
 			SET @Query = 'SELECT '
 
-			IF @IsSelectDistinctFlag = 1 AND @SourceType IN ('SQL')
+			IF @IsSelectDistinctFlag = 1 AND @SourceType IN ('Azure SQLDB', 'SQL Server')
 				SET @Query = @Query + 'DISTINCT '
 
 			-- Columns
@@ -127,7 +134,7 @@ DECLARE @InsertDateTime DATETIME = '1900-01-01'
 			SET @Query = @Query + ', ' + @MetadataColumns + ' '
 
 			-- FROM Clause
-			IF @SourceType = 'SQL'
+			IF @SourceType IN ('Azure SQLDB', 'SQL Server')
 			BEGIN
 				SET @Query = @Query + 'FROM '
 

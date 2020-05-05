@@ -1,8 +1,5 @@
 ﻿
 
-
-
-
 CREATE PROCEDURE [etl].[GetTaskInfo] 
 	@TaskAuditKey INT
 AS
@@ -42,7 +39,9 @@ If one is found, then we will return the ConfigValue and attempt to interpret it
 Otherwise if no value is returned from etl.KeyValueConfig but the path value is still enclosed in curly brackets, then we'll attempt to interpret any tokens and then use the subsequent value for the path.
 Finally, if there are no curly brackets, then we'll just use the path value as-is.
 */
+DECLARE @errorMessage NVARCHAR(2048) -- just declare this here. there are several spots later where we may attempt to use this
 
+-- determine data lake locations/paths
 -- the following variables will be read in from metadata on either the etl.Task or etl.KeyValueConfig tables
 DECLARE @dataLakeTransientLandingAreaPath NVARCHAR(2000)
 DECLARE @dataLakeTransientLandingAreaFileName NVARCHAR(2000)
@@ -83,7 +82,7 @@ DECLARE @curatedResolvedContainer NVARCHAR(2000)
 DECLARE @curatedResolvedPath NVARCHAR(2000)
 DECLARE @curatedResolvedFileName NVARCHAR(2000)
 
--- default filename if none is supplied
+-- set the default filename if none is supplied
 IF NULLIF(@dataLakeTransientLandingAreaFileName, '') IS NULL AND NULLIF(@dataLakeTransientLandingAreaPath, '') IS NOT NULL
 	SET @dataLakeTransientLandingAreaFileName = 'landed-{TaskAuditKey}_{ETLDate}.parquet'
 
@@ -180,13 +179,58 @@ BEGIN
 	SET @curatedResolvedPath = RIGHT(@curatedResolvedPath, LEN(@curatedResolvedPath) - CHARINDEX('/', @curatedResolvedPath))
 END
 
+-- this marks the end of the token substitution code
 
--- this marks the end of the token substitution code. now return all the fields
+-- get the source connection info. if this is missing, form an error message to make it obvious what the problem is
+DECLARE @connectionType NVARCHAR(50), @connectionStringSecretName NVARCHAR(2000)
+DECLARE @sourceName NVARCHAR(200), @taskKey INT, @connectionName NVARCHAR(200) -- grab these just to use in the error message in case we have an error
+
+SELECT
+	@connectionType = ConnectionConfig.ConnectionType,
+	@connectionStringSecretName = ConnectionConfig.ConnectionStringSecretName,
+	@sourceName = Task.SourceName,
+	@taskKey = Task.TaskKey,
+	@connectionName = ConnectionName
+FROM etl.TaskAudit 
+INNER JOIN etl.Task 
+	ON TaskAudit.TaskKey = Task.TaskKey
+LEFT OUTER JOIN etl.ConnectionConfig
+	ON Task.SourceName = ConnectionConfig.ConnectionName
+WHERE TaskAuditKey = @TaskAuditKey
+
+IF @connectionType IS NULL OR @connectionStringSecretName IS NULL
+BEGIN
+	-- let's see what type of error we have, exactly
+
+	-- join to ConnectionConfig failed/did not find a match
+	IF @connectionType IS NULL AND @connectionStringSecretName IS NULL -- looks like the join to etl.ConnectionConfig failed
+	BEGIN
+		SET @errorMessage =  'Error: The SourceName "' + @sourceName + '" defined by TaskKey "' + CONVERT(VARCHAR(5), @taskKey) + '" needs to match a ConnectionName in the etl.ConnectionConfig table. Could not locate a ConnectionName that matches this SourceName.';
+		THROW 50000, @errorMessage, 1;
+	END
+
+	IF @connectionType IS NULL AND @connectionName IS NOT NULL
+	BEGIN
+		SET @errorMessage =  'Error: The ConnectionName "' + @connectionName + '" does not have a ConnectionType defined for it in the etl.ConnectionConfig table. This is required.';
+		THROW 50000, @errorMessage, 1;
+	END
+
+	IF @connectionStringSecretName IS NULL AND @connectionName IS NOT NULL
+	BEGIN
+		SET @errorMessage =  'Error: The ConnectionName "' + @connectionName + '" needs to have a Key Vault secret specified in the etl.ConnectionConfig table. The secret''s value must be the connection string property for the linked server.';
+		THROW 50000, @errorMessage, 1;
+	END
+
+END
+
+--now return all the fields
 
 
 SELECT 
 	Task.TaskKey,	
-	SourceType, 
+	@connectionType AS SourceType,
+	@connectionStringSecretName AS SourceConnectionStringSecretName,
+	
 	@landingAreaResolvedContainer AS TransientLandingAreaContainer,
 	@landingAreaResolvedPath AS TransientLandingAreaFolder,
 	@landingAreaResolvedFileName AS TransientLandingAreaFileName,
@@ -201,12 +245,9 @@ SELECT
 
 	ISNULL((SELECT TOP 1 ConfigValue FROM etl.KeyValueConfig WHERE ConfigKey = 'LandingAreaFileCompressionType'), 'snappy') AS TransientLandingAreaFileCompressionType,
 	ISNULL((SELECT TOP 1 ConfigValue FROM etl.KeyValueConfig WHERE ConfigKey = 'RawFileCompressionType'), 'snappy') AS PersistedRawFileCompressionType,
-	ISNULL((SELECT TOP 1 ConfigValue FROM etl.KeyValueConfig WHERE ConfigKey = 'CuratedFileCompressionType'), 'snappy') AS CuratedFileCompressionType,
+	ISNULL((SELECT TOP 1 ConfigValue FROM etl.KeyValueConfig WHERE ConfigKey = 'CuratedFileCompressionType'), 'snappy') AS CuratedFileCompressionType
 
-	Task.DataIntegrationUnits,
-	Task.DegreeOfParalleism 
-	
 FROM etl.TaskAudit 
 INNER JOIN etl.Task 
-	ON TaskAudit.TaskKey = Task.TaskKey 
+	ON TaskAudit.TaskKey = Task.TaskKey
 WHERE TaskAuditKey = @TaskAuditKey

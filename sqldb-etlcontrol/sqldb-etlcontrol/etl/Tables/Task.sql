@@ -5,7 +5,6 @@
     [AdvancedTaskKey]                      INT             NULL,
     [AdvancedNextTaskKey]                  INT             NULL,
     [SourceName]                           NVARCHAR (200)  NULL,
-    [SourceType]                           NVARCHAR (200)  NULL,
     [SourceDatabaseName]                   NVARCHAR (200)  NULL,
     [SourceSchemaName]                     NVARCHAR (200)  NULL,
     [SourceTableName]                      NVARCHAR (200)  NULL,
@@ -37,6 +36,8 @@
     [DisableAction]                        BIT             DEFAULT ((0)) NULL,
     CONSTRAINT [PK_etl_Task] PRIMARY KEY CLUSTERED ([TaskKey] ASC)
 );
+
+
 
 
 
