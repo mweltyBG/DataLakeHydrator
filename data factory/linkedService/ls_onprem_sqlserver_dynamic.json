@@ -1,0 +1,30 @@
+{
+	"name": "ls_onprem_sqlserver_dynamic",
+	"properties": {
+		"description": "On-premise SQL Server database",
+		"parameters": {
+			"KeyVaultSecretName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_keyvault",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": {
+					"value": "@linkedService().KeyVaultSecretName",
+					"type": "Expression"
+				}
+			}
+		},
+		"connectVia": {
+			"referenceName": "ir-onprem-01",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
