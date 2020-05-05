@@ -113,7 +113,7 @@
 					},
 					"cases": [
 						{
-							"value": "SQL",
+							"value": "SQL Server",
 							"activities": [
 								{
 									"name": "ingest_sql",
@@ -150,7 +150,7 @@
 											"type": "DatasetReference",
 											"parameters": {
 												"KVConnectionString": {
-													"value": "@pipeline().parameters.KVConnectionStringSecretName",
+													"value": "@activity('Get_Task_Info').output.firstRow.SourceKVSecretName",
 													"type": "Expression"
 												}
 											}
@@ -601,10 +601,6 @@
 			"TaskAuditKey": {
 				"type": "int",
 				"defaultValue": 1
-			},
-			"KVConnectionStringSecretName": {
-				"type": "string",
-				"defaultValue": "kv-bgdatalakehydrator-adf-ls-onprem-sqlserver-david"
 			}
 		},
 		"variables": {
