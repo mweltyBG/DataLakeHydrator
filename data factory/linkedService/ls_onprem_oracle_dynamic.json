@@ -1,0 +1,30 @@
+{
+	"name": "ls_onprem_oracle_dynamic",
+	"properties": {
+		"description": "On-premise Oracle database",
+		"parameters": {
+			"KeyVaultSecretName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Oracle",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_keyvault",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": {
+					"value": "@linkedService().KeyVaultSecretName",
+					"type": "Expression"
+				}
+			}
+		},
+		"connectVia": {
+			"referenceName": "ir-onprem-01",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
