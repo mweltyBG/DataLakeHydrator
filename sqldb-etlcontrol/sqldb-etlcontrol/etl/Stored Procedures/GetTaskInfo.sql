@@ -227,7 +227,7 @@ SELECT
 		ELSE ''
 	END  as SourceType, -- see notes, this needs to match the switch statement
 	
-	ISNULL(Sources.ConnectionStringSecret, 'kv-' + Task.SourceName + '-connstr') as ConnectionStringSecret,
+	ISNULL(Sources.ConnectionStringSecret, 'kv-' + REPLACE(Task.SourceName,'_','') + '-connstr') as ConnectionStringSecret,
 	
 	CASE 
 		WHEN Sources.SourceType = 'SQLServer' AND Sources.AuthenticationType = 'Windows' AND Sources.UserName <> ''
@@ -239,7 +239,7 @@ SELECT
 		WHEN Sources.SourceType = 'SQLServer' AND Sources.AuthenticationType = 'Windows' AND Sources.PasswordSecret <> ''
 		THEN Sources.PasswordSecret
 		WHEN Sources.SourceType = 'SQLServer' AND Sources.AuthenticationType = 'Windows'
-		THEN 'kv-' + Task.SourceName + '-passwd'
+		THEN 'kv-' + REPLACE(Task.SourceName,'_','') + '-passwd'
 		ELSE ''
 	END as PasswordSecret, -- This might not be necessary.  See notes above.
 	
