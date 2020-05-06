@@ -1,18 +1,18 @@
 {
-    "name": "ls_azure_sqldb_etlcontrol",
-    "properties": {
-        "annotations": [],
-        "type": "AzureSqlDatabase",
-        "typeProperties": {
-            "connectionString": {
-                "type": "AzureKeyVaultSecret",
-                "store": {
-                    "referenceName": "ls_keyvault",
-                    "type": "LinkedServiceReference"
-                },
-                "secretName": "kv-etlcontrol-connstr"
-            }
-        }
-    },
-    "type": "Microsoft.DataFactory/factories/linkedservices"
+	"name": "ls_azure_sqldb_etlcontrol",
+	"properties": {
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_keyvault",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "kv-etlcontrol-connstr"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
 }
