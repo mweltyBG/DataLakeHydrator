@@ -2,7 +2,7 @@
 	"name": "ds_adlsv2_selfhosted_parquet",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "ls_adlv2_selfhosted",
+			"referenceName": "ls_adlsv2_selfhosted",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
