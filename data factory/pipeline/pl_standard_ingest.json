@@ -147,7 +147,13 @@
 									"inputs": [
 										{
 											"referenceName": "ds_sqlserver_selfhosted_sql",
-											"type": "DatasetReference"
+											"type": "DatasetReference",
+											"parameters": {
+												"ConnectionSecretName":{
+													"value": "@activity('Get_Task_Info').output.firstRow.ConnectionSecretName",
+													"type": "Expression"
+												}
+											}
 										}
 									],
 									"outputs": [
@@ -252,7 +258,21 @@
 									"inputs": [
 										{
 											"referenceName": "ds_sqlserver_selfhosted_windows",
-											"type": "DatasetReference"
+											"type": "DatasetReference",
+											"parameters": {
+												"ConnectionSecretName":{
+													"value": "@activity('Get_Task_Info').output.firstRow.ConnectionSecretName",
+													"type": "Expression"
+												},
+												"UserName": {
+													"value": "@activity('Get_Task_Info').output.firstRow.UserName",
+													"type": "Expression"
+												},
+												"PasswordSecretName": {
+													"value": "@activity('Get_Task_Info').output.firstRow.PasswordSecretName",
+													"type": "Expression"
+												}
+											}
 										}
 									],
 									"outputs": [
@@ -357,7 +377,13 @@
 									"inputs": [
 										{
 											"referenceName": "ds_azuresql_autoresolveintegrationruntime",
-											"type": "DatasetReference"
+											"type": "DatasetReference",
+											"parameters": {
+												"ConnectionSecretName":{
+													"value": "@activity('Get_Task_Info').output.firstRow.ConnectionSecretName",
+													"type": "Expression"
+												}
+											}
 										}
 									],
 									"outputs": [

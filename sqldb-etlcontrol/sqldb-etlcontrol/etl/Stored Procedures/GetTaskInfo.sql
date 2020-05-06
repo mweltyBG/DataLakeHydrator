@@ -1,9 +1,4 @@
-﻿
-
-
-
-
-CREATE PROCEDURE [etl].[GetTaskInfo] 
+﻿CREATE PROCEDURE [etl].[GetTaskInfo] 
 	@TaskAuditKey INT
 AS
 
@@ -227,7 +222,7 @@ SELECT
 		ELSE ''
 	END  as SourceType, -- see notes, this needs to match the switch statement
 	
-	ISNULL(Sources.ConnectionStringSecret, 'kv-' + REPLACE(Task.SourceName,'_','') + '-connstr') as ConnectionStringSecret,
+	ISNULL(Sources.ConnectionStringSecret, 'kv-' + REPLACE(Task.SourceName,'_','') + '-connstr') as ConnectionSecretName,
 	
 	CASE 
 		WHEN Sources.SourceType = 'SQLServer' AND Sources.AuthenticationType = 'Windows' AND Sources.UserName <> ''
@@ -241,7 +236,7 @@ SELECT
 		WHEN Sources.SourceType = 'SQLServer' AND Sources.AuthenticationType = 'Windows'
 		THEN 'kv-' + REPLACE(Task.SourceName,'_','') + '-passwd'
 		ELSE ''
-	END as PasswordSecret, -- This might not be necessary.  See notes above.
+	END as PasswordSecretName, -- This might not be necessary.  See notes above.
 	
 	-- Target info
 	@landingAreaResolvedContainer AS TransientLandingAreaContainer,
