@@ -31,12 +31,12 @@ BEGIN
 	INSERT INTO @returnTable SELECT TOP 1 'TaskKey', CONVERT(NVARCHAR, TaskKey) FROM etl.TaskAudit WHERE TaskAuditKey = @TaskAuditKey
 	
 	-- values off the Task record
-	INSERT INTO @returnTable SELECT TOP 1 'SourceName', CONVERT(NVARCHAR, Task.SourceName) FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey WHERE TaskAuditKey = @TaskAuditKey
-	INSERT INTO @returnTable SELECT TOP 1 'SourceType', CONVERT(NVARCHAR, ConnectionConfig.ConnectionType) FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey INNER JOIN etl.ConnectionConfig ON Task.SourceName = ConnectionConfig.ConnectionName WHERE TaskAuditKey = @TaskAuditKey
-	INSERT INTO @returnTable SELECT TOP 1 'SourceDatabaseName', CONVERT(NVARCHAR, Task.SourceDatabaseName) FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey WHERE TaskAuditKey = @TaskAuditKey
-	INSERT INTO @returnTable SELECT TOP 1 'SourceSchemaName', CONVERT(NVARCHAR, Task.SourceSchemaName) FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey WHERE TaskAuditKey = @TaskAuditKey
-	INSERT INTO @returnTable SELECT TOP 1 'SourceTableName', CONVERT(NVARCHAR, Task.SourceTableName) FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey WHERE TaskAuditKey = @TaskAuditKey
-	INSERT INTO @returnTable SELECT TOP 1 'AdvancedConfigName', CONVERT(NVARCHAR, Task.AdvancedConfigName) FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey WHERE TaskAuditKey = @TaskAuditKey
+	INSERT INTO @returnTable SELECT TOP 1 'SourceName', Task.SourceName FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey WHERE TaskAuditKey = @TaskAuditKey
+	INSERT INTO @returnTable SELECT TOP 1 'SourceType', ConnectionConfig.ConnectionType FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey INNER JOIN etl.ConnectionConfig ON Task.SourceName = ConnectionConfig.ConnectionName WHERE TaskAuditKey = @TaskAuditKey
+	INSERT INTO @returnTable SELECT TOP 1 'SourceDatabaseName', Task.SourceDatabaseName FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey WHERE TaskAuditKey = @TaskAuditKey
+	INSERT INTO @returnTable SELECT TOP 1 'SourceSchemaName', Task.SourceSchemaName FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey WHERE TaskAuditKey = @TaskAuditKey
+	INSERT INTO @returnTable SELECT TOP 1 'SourceTableName', Task.SourceTableName FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey WHERE TaskAuditKey = @TaskAuditKey
+	INSERT INTO @returnTable SELECT TOP 1 'AdvancedConfigName', Task.AdvancedConfigName FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey WHERE TaskAuditKey = @TaskAuditKey
 
 	-- replace null with some sort of string value
 	UPDATE @returnTable SET LiteralValue = ISNULL(LiteralValue, 'NULL')
