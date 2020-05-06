@@ -1,27 +1,27 @@
 {
-    "name": "ls_azuresql_autoresolveintegrationruntime",
-    "properties": {
-        "parameters": {
+	"name": "ls_azuresql_autoresolveintegrationruntime",
+	"properties": {
+		"parameters": {
 			"ConnectionSecretName": {
 				"type": "string",
-				"defaultValue": "kv-sourcesystem-connstr"
-            }
-        },
+				"defaultValue": "kv-adflanding-connstr"
+			}
+		},
 		"annotations": [],
-        "type": "AzureSqlDatabase",
-        "typeProperties": {
-            "connectionString": {
-                "type": "AzureKeyVaultSecret",
-                "store": {
-                    "referenceName": "ls_keyvault",
-                    "type": "LinkedServiceReference"
-                },
-                "secretName": {
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_keyvault",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": {
 					"value": "@linkedService().ConnectionSecretName",
 					"type": "Expression"
 				}
-            }
-        }
-    },
-    "type": "Microsoft.DataFactory/factories/linkedservices"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
 }
