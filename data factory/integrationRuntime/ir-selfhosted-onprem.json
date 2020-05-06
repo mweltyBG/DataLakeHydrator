@@ -1,0 +1,12 @@
+{
+	"name": "ir-selfhosted-onprem",
+	"properties": {
+		"type": "SelfHosted",
+		"typeProperties": {
+			"linkedInfo": {
+				"resourceId": "/subscriptions/3aa0c810-3bcb-407a-a221-5aa031eb390b/resourcegroups/Default-Web-CentralUS/providers/Microsoft.DataFactory/factories/ADFv2SSC/integrationruntimes/SQL2017VMIntegration",
+				"authorizationType": "Rbac"
+			}
+		}
+	}
+}
