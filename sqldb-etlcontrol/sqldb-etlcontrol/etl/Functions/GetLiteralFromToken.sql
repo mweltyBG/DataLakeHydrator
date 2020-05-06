@@ -34,7 +34,7 @@ BEGIN
 	
 	-- values off the Task record
 	INSERT INTO @returnTable SELECT TOP 1 'SourceName', CONVERT(NVARCHAR, Task.SourceName) FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey WHERE TaskAuditKey = @TaskAuditKey
-	INSERT INTO @returnTable SELECT TOP 1 'SourceType', CONVERT(NVARCHAR, Task.SourceType) FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey WHERE TaskAuditKey = @TaskAuditKey
+	--INSERT INTO @returnTable SELECT TOP 1 'SourceType', CONVERT(NVARCHAR, Task.SourceType) FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey WHERE TaskAuditKey = @TaskAuditKey
 	--INSERT INTO @returnTable SELECT TOP 1 'SourceDatabaseName', CONVERT(NVARCHAR, Task.SourceDatabaseName) FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey WHERE TaskAuditKey = @TaskAuditKey
 	INSERT INTO @returnTable SELECT TOP 1 'SourceSchemaName', CONVERT(NVARCHAR, Task.SourceSchemaName) FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey WHERE TaskAuditKey = @TaskAuditKey
 	INSERT INTO @returnTable SELECT TOP 1 'SourceTableName', CONVERT(NVARCHAR, Task.SourceTableName) FROM etl.TaskAudit INNER JOIN etl.Task ON TaskAudit.TaskKey = Task.TaskKey WHERE TaskAuditKey = @TaskAuditKey
@@ -51,7 +51,9 @@ BEGIN
 			U.Token, U.LiteralValue
 		FROM 
 			(SELECT * FROM etl.Sources WHERE SourceName = @SourceName) as S
-			UNPIVOT (LiteralValue FOR Token IN (AuthenticationType, UserName, IntegrationRuntimeName, ConnectionStringSecret, PasswordSecret)) as U
+			UNPIVOT (LiteralValue FOR Token IN (SourceType, AuthenticationType, UserName, IntegrationRuntimeName, ConnectionStringSecret, PasswordSecret)) as U
+		WHERE
+			U.LiteralValue IS NOT NULL;
 	END
 
 	-- replace null with some sort of string value

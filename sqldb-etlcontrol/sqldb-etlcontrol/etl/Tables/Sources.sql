@@ -21,7 +21,7 @@ Source Options
 CREATE TABLE [etl].[Sources]
 (
 	[SourceName] NVARCHAR(200) NOT NULL,
-	[SourceType] NVARCHAR(100) NULL DEFAULT 'SQLServer', 
+	[SourceType] NVARCHAR(200) NULL DEFAULT 'SQLServer', 
 	[AuthenticationType] NVARCHAR(200) NULL,
 	[UserName] NVARCHAR(200) NULL,
 	[IntegrationRuntimeName] NVARCHAR(200) NULL,

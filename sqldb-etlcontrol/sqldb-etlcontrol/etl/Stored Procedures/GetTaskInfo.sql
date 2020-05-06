@@ -219,7 +219,7 @@ SELECT
 		WHEN ISNULL(Sources.SourceType,'SQLServer') NOT IN ('SQLServer') THEN ''
 		WHEN Sources.AuthenticationType <> ''
 		THEN '_' + Sources.AuthenticationType
-		ELSE ''
+		ELSE '_SQL'
 	END  as SourceType, -- see notes, this needs to match the switch statement
 	
 	ISNULL(Sources.ConnectionStringSecret, 'kv-' + REPLACE(Task.SourceName,'_','') + '-connstr') as ConnectionSecretName,
