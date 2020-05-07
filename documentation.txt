@@ -5,6 +5,8 @@ You will need the following set up in your Azure subscription:
 - Key Vault
 - an empty Azure SQL Database to host the configuration information
 - an empty Azure Data Factory
+    - do not set up the self-hosted integration runtime
+    - do not set up source code integration
 - an Azure data lake v2 storage account (hierarchical storage enabled)
 - Unless all your source systems can be reached by the autoresolveintegrationruntime, you need an on-prem box with the following installed
     - We'll walk you through some of the integration runtime setup bits, so don't jump ahead!
@@ -17,13 +19,32 @@ Setting up Key Vault
 - set up a secret named kv-datalake-key with the access key to your adlsv2 account
 - you can hold off setting up the connection strings for other sources until later.
 
+Setting up Data Factory (for dev work)
+- in Data Factory, create an integration runtime named ir-selfhosted-onprem
+    - install on the server, etc.
+    - click on the code button next to ir-selfhosted-onprem and save the JSON for the integration runtime.
+- Open up your git tool of choice
+    - Open up BG-Commit\DataLakeHydrator and create a new branch
+    - download the new branch to someplace handy with your Git tool of choice
+- In a text editor (I suggest Visual Studio Code) make a few changes to the linked services JSON files:
+    - change the URL in the ls_adlsv2_autoresolveintegrationruntime and ls_adlsv2_selfhosted linked services to your storage account
+    - change the URL in the ls_keyvault to your keyvault account
+    - in ir-selfhosted-onprem.json, paste in the code that you saved earlier for YOUR integration runtime.
+- Commit and push the changes to BG-Commit
+- Connect your Data Factory to BG-Commit\DataLakeHydrator.
+    Github account: BG-Commit
+    root folder: /data Factory
+    Collaboration branch: the branch you made
+- Set up the control database and test things out.
+
 Setting up the control Database
 - You can either use schema compare to deploy the structure OR use a bacpac file.  Just get the structure applied to it.
+- Then you can start configuring etl.Tasks, etl.Sources and other stuff
 
 Tasks:
 The "etl.Task" table contains a row for each table you want to import. The minimum fields you should enter are (more or less):
 
-SourceName: the name you've decided to give the source system. It assumes that the source system is SQL Server (on-prem) unless you add an entry to etl.Sources
+SourceName: the name you've decided to give the source system. It assumes that the source system is handled specifically in ADF unless you add an entry to etl.Sources
 SourceTableName: name of the table you want to import
 TargetDataLakeContainer: the name of the storage account container you want to save the parquet file to
 TargetDataLakeFolder: destination folder

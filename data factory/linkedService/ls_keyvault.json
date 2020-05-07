@@ -4,7 +4,7 @@
 		"annotations": [],
 		"type": "AzureKeyVault",
 		"typeProperties": {
-			"baseUrl": "https://BGKeyVaultDEV.vault.azure.net/"
+			"baseUrl": "https://BGKeyVaultDLH.vault.azure.net/"
 		}
 	}
 }

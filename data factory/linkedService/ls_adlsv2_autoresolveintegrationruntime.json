@@ -11,7 +11,7 @@
                     "referenceName": "ls_keyvault",
                     "type": "LinkedServiceReference"
                 },
-                "secretName": "kv-stbgdatalakehydrator001-key"
+                "secretName": "kv-datalake-key"
             }
         }
     },

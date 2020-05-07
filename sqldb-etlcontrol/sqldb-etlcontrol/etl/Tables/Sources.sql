@@ -5,6 +5,8 @@ This catalogs logical sources which are used by a dynamic source.  It is used on
 Note that there needs to be a linked service that is set up to use these options.
 
 Source Options
+- Source Type - Use this to specify the source type.  If it's NULL, then SourceName will be passed through to the switch in Data Factory, and you will
+  have to accommodate the source there.
 - Authentication Type - only currently used for SQL (not Azure SQL).  With Azure SQL, the connection string can contain all the authorization information.  
   With SQL Server, using Windows authentication requires that you provide a connection string, username and password.  Since we're using Key Vault for the
   Connection String and password, we can specify a secret name, or just use the default ('kv-' + SourceName + '-connstr' or 'kv-' + SourceName + '-passwd')
@@ -28,5 +30,6 @@ CREATE TABLE [etl].[Sources]
 	[ConnectionStringSecret] NVARCHAR(200) NULL,
 	[PasswordSecret] NVARCHAR(200) NULL,
 	CONSTRAINT [PK_ETL_SOURCES] PRIMARY KEY CLUSTERED ([SourceName]), 
-    CONSTRAINT [CK_ETL_Sources_Sourcetype] CHECK (SourceType IS NULL OR SourceType IN ('SQLServer','AzureSQL','Oracle'))
+    CONSTRAINT [CK_ETL_Sources_Sourcetype] CHECK (SourceType IS NULL OR SourceType IN ('SQLServer','AzureSQL','Oracle')),
+	CONSTRAINT [CK_ETL_Sources_AuthenticationType] CHECK (AuthenticationType IS NULL OR AuthenticationType IN ('SQL','WINDOWS'))
 )

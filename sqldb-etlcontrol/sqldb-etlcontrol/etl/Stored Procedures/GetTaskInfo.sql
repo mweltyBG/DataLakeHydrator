@@ -50,7 +50,9 @@ SQL Server (Windows auth): SQLServer_Windows
 SQL Server (Windows auth and specify integration runtime): SQLServer_integrationruntime_Windows
 
 Here's what you can specify in etl.Sources:
-- Authentication Type - only currently used for SQL Server (not Azure SQL).  With Azure SQL, the connection string can contain all the authorization information.  
+- Source Type - Use this to specify the source type.  If it's NULL, then SourceName will be passed through to the switch in Data Factory, and you will
+  have to accommodate the source there.
+- Authentication Type - only currently used for SQL (not Azure SQL).  With Azure SQL, the connection string can contain all the authorization information.  
   With SQL Server, using Windows authentication requires that you provide a connection string, username and password.  Since we're using Key Vault for the
   Connection String and password, we can specify a secret name, or just use the default ('kv-' + SourceName + '-connstr' or 'kv-' + SourceName + '-passwd')
 - UserName - if the SQL Server uses Windows authentication, specify the 'Domain\User' here
@@ -209,34 +211,21 @@ SELECT
 	Task.TaskKey,	
 
 	-- Source info
-	ISNULL(Sources.SourceType, 'SQLServer')
-	+ CASE 
-		WHEN Sources.IntegrationRuntimeName <> ''
-		THEN '_' + Sources.IntegrationRuntimeName
-		ELSE ''
-	END
-	+ CASE 
-		WHEN ISNULL(Sources.SourceType,'SQLServer') NOT IN ('SQLServer') THEN ''
-		WHEN Sources.AuthenticationType <> ''
-		THEN '_' + Sources.AuthenticationType
-		ELSE '_SQL'
-	END  as SourceType, -- see notes, this needs to match the switch statement
+	ISNULL(
+		Sources.SourceType
+			+ ISNULL('_' + Sources.IntegrationRuntimeName, '')
+			+ CASE 
+				WHEN Sources.SourceType NOT IN ('SQLServer') THEN ''
+				WHEN Sources.AuthenticationType <> ''
+				THEN '_' + Sources.AuthenticationType
+				ELSE '_SQL'
+			END,
+		Task.SourceName
+	) as SourceType, -- see notes, this needs to match the switch statement
 	
 	ISNULL(Sources.ConnectionStringSecret, 'kv-' + REPLACE(Task.SourceName,'_','') + '-connstr') as ConnectionSecretName,
-	
-	CASE 
-		WHEN Sources.SourceType = 'SQLServer' AND Sources.AuthenticationType = 'Windows' AND Sources.UserName <> ''
-		THEN Sources.UserName
-		ELSE ''
-	END as UserName,
-	
-	CASE 
-		WHEN Sources.SourceType = 'SQLServer' AND Sources.AuthenticationType = 'Windows' AND Sources.PasswordSecret <> ''
-		THEN Sources.PasswordSecret
-		WHEN Sources.SourceType = 'SQLServer' AND Sources.AuthenticationType = 'Windows'
-		THEN 'kv-' + REPLACE(Task.SourceName,'_','') + '-passwd'
-		ELSE ''
-	END as PasswordSecretName, -- This might not be necessary.  See notes above.
+	ISNULL(Sources.UserName,'') as UserName,
+	ISNULL(Sources.PasswordSecret, 'kv-' + REPLACE(Task.SourceName,'_','') + '-passwd') as PasswordSecretName, -- This might not be necessary.  See notes above.
 	
 	-- Target info
 	@landingAreaResolvedContainer AS TransientLandingAreaContainer,
