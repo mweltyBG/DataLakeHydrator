@@ -5,7 +5,7 @@
     [AdvancedTaskKey]                      INT             NULL,
     [AdvancedNextTaskKey]                  INT             NULL,
     [SourceName]                           NVARCHAR (200)  NULL,
-    --[SourceType]                           NVARCHAR (200)  NULL, -- this defaults to SQLServer, and can be overridden in etl.Sources
+    --[SourceType]                           NVARCHAR (200)  NULL, -- this defaults to SQLServer, and can be overridden in etl.Source
     --[SourceDatabaseName]                   NVARCHAR (200)  NULL, -- this is specified in the connection string in the connection string secret
     [SourceSchemaName]                     NVARCHAR (200)  NULL,
     [SourceTableName]                      NVARCHAR (200)  NULL,
@@ -37,6 +37,8 @@
     [DisableAction]                        BIT             DEFAULT ((0)) NULL,
     CONSTRAINT [PK_etl_Task] PRIMARY KEY CLUSTERED ([TaskKey] ASC)
 );
+
+
 
 
 

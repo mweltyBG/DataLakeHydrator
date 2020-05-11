@@ -1,0 +1,23 @@
+{
+	"name": "ds_onprem_mysql_dynamic",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_onprem_mysql_dynamic",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"KeyVaultSecretName": {
+					"value": "@dataset().KeyVaultSecretName",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"KeyVaultSecretName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "MySqlTable",
+		"schema": []
+	}
+}

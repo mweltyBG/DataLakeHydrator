@@ -1,0 +1,23 @@
+{
+	"name": "ds_azure_sqldw_dynamic",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_azure_sqldw_dynamic",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"KeyVaultSecretName": {
+					"value": "@dataset().KeyVaultSecretName",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"KeyVaultSecretName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlDWTable",
+		"schema": []
+	}
+}

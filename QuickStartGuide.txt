@@ -1,0 +1,8 @@
+1. Create key vault
+2. Create Azure SQL DB
+3. Create/set up on-premise integration runtime
+4. Deploy DataLakeHydrator code to ADF and the Azure SQL Db
+5. If you are pulling data from one of the source systems that supports dynamic connection strings (SQL Server, Oracle, MySQL, etc), you will need to edit etl.ConnectionConfig. Decide on a name for each source system. The connection string (which needs to contain the username and password) need to go into a key vault secret. Then in the etl.ConnectionConfig table for that system, reference the key vault secret name.
+6. Populate rows in the etl.Task table. The SourceName value needs to match the name of the connection name you entered in the etl.ConnectionConfig table. Add other details to the etl.Task record, such as the source schema name, source table name, etc. Also specify where in the data lake you want to land the file. There are two options:
+	a. The parquet file first gets created in the "transient" landing area. Optionally, it could then get copied to the permanent raw area.
+	b. Or the data bypasses the transient landing area and just goes straight to the permanent raw area.

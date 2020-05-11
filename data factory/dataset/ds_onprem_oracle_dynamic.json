@@ -1,0 +1,23 @@
+{
+	"name": "ds_onprem_oracle_dynamic",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_onprem_oracle_dynamic",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"KeyVaultSecretName": {
+					"value": "@dataset().KeyVaultSecretName",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"KeyVaultSecretName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "OracleTable",
+		"schema": []
+	}
+}

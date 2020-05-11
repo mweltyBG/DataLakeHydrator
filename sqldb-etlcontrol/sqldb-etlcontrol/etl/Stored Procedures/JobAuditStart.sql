@@ -1,6 +1,7 @@
 ﻿
 
 
+
 CREATE PROCEDURE [etl].[JobAuditStart] (
 	@JobName NVARCHAR(500) = 'default',
 	@DataFactoryName NVARCHAR(200) = 'unknown'
@@ -90,6 +91,7 @@ BEGIN
 		LEFT OUTER JOIN etl.Job
 			ON TaskJobBridge.JobKey = Job.JobKey
 		WHERE (@JobName = 'default' OR Job.JobName = @JobName)
+			AND ISNULL(Task.DisableAction, 0) != 1
 
 		-- return the newly-created JobAuditKey value
 		SELECT @JobAuditKey AS JobAuditKey

@@ -1,5 +1,5 @@
 ﻿/*
-ETL.Sources
+etl.Source
 
 This catalogs logical sources which are used by a dynamic source.  It is used only when you need to specify an integration runtime or non-default behavior.
 Note that there needs to be a linked service that is set up to use these options.

@@ -39,12 +39,12 @@ Setting up Data Factory (for dev work)
 
 Setting up the control Database
 - You can either use schema compare to deploy the structure OR use a bacpac file.  Just get the structure applied to it.
-- Then you can start configuring etl.Tasks, etl.Sources and other stuff
+- Then you can start configuring etl.Tasks, etl.Source and other stuff
 
 Tasks:
 The "etl.Task" table contains a row for each table you want to import. The minimum fields you should enter are (more or less):
 
-SourceName: the name you've decided to give the source system. It assumes that the source system is handled specifically in ADF unless you add an entry to etl.Sources
+SourceName: the name you've decided to give the source system. It assumes that the source system is handled specifically in ADF unless you add an entry to etl.Source
 SourceTableName: name of the table you want to import
 TargetDataLakeContainer: the name of the storage account container you want to save the parquet file to
 TargetDataLakeFolder: destination folder
@@ -66,7 +66,7 @@ The "pl_standard_ingest" pipeline takes a particular "TaskAuditKey" value as a p
 
 Sources:
 This is used to override default behaviors for a source, allowing you to specify the type, authentication, custom keyvault secret names, user names and if you really want to get crazy, integration runtime.  Talk to Steve Cardella if you want to specify the integration runtimes.
-Type - currently supported is SQLServer or AzureSQL.  Any other type would require you to make an addition to the switch statement and check constraint on etl.Sources.
+Type - currently supported is SQLServer or AzureSQL.  Any other type would require you to make an addition to the switch statement and check constraint on etl.Source.
 Authentication - for SQLServer, it allows you to specify "SQL" for SQL authentication or "WINDOWS" for Windows authentication (Active directory, etc.)
 UserName - If you are using windows authentication, specify the Domain\Username here.
 IntegrationRuntimeName - If you're using multiple self-hosted integration runtimes, you specify which integration runtime you want here.  If you specify something here, you need extra entries in the switch statement and supporting datasets/linked services.
