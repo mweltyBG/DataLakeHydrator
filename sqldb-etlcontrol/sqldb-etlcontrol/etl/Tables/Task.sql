@@ -5,7 +5,8 @@
     [AdvancedTaskKey]                      INT             NULL,
     [AdvancedNextTaskKey]                  INT             NULL,
     [SourceName]                           NVARCHAR (200)  NULL,
-    [SourceDatabaseName]                   NVARCHAR (200)  NULL,
+    --[SourceType]                           NVARCHAR (200)  NULL, -- this defaults to SQLServer, and can be overridden in etl.Source
+    --[SourceDatabaseName]                   NVARCHAR (200)  NULL, -- this is specified in the connection string in the connection string secret
     [SourceSchemaName]                     NVARCHAR (200)  NULL,
     [SourceTableName]                      NVARCHAR (200)  NULL,
     [SourceColumnList]                     NVARCHAR (4000) NULL,

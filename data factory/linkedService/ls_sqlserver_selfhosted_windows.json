@@ -1,0 +1,50 @@
+{
+	"name": "ls_sqlserver_selfhosted_windows",
+	"properties": {
+		"parameters": {
+			"ConnectionSecretName": {
+				"type": "string",
+				"defaultValue": "kv-BimlExample-connstr"
+			},
+			"PasswordSecretName": {
+				"type": "string",
+				"defaultValue": "kv-BimlExample-passwd"
+			},
+			"UserName": {
+				"type": "string",
+				"defaultValue": "SqlServer2017\\ADFWindowsUser"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_keyvault",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": {
+					"value": "@linkedService().ConnectionSecretName",
+					"type": "Expression"
+				}
+			},
+			"userName": "@{linkedService().UserName}",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_keyvault",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": {
+					"value": "@linkedService().PasswordSecretName",
+					"type": "Expression"
+				}
+			}
+		},
+		"connectVia": {
+			"referenceName": "ir-selfhosted-onprem",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

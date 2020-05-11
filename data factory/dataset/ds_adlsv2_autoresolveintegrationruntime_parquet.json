@@ -1,8 +1,8 @@
 {
-	"name": "ds_azure_datalake_parquet_dynamic",
+	"name": "ds_adlsv2_autoresolveintegrationruntime_parquet",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "ds_azure_datalake_staging_dynamic",
+			"referenceName": "ls_adlsv2_autoresolveintegrationruntime",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {

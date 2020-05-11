@@ -1,7 +1,13 @@
 {
-    "name": "ls_sqlserver_scardella_sql",
+    "name": "ls_sqlserver_selfhosted_sql",
     "properties": {
-        "annotations": [],
+        "parameters": {
+			"ConnectionSecretName": {
+				"type": "string",
+				"defaultValue": "kv-SampleSource-connstr"
+			}
+		},
+		"annotations": [],
         "type": "SqlServer",
         "typeProperties": {
             "connectionString": {
@@ -10,11 +16,14 @@
                     "referenceName": "ls_keyvault",
                     "type": "LinkedServiceReference"
                 },
-                "secretName": "kv-samplesourcesqlauth-connstr"
+                "secretName": {
+					"value": "@linkedService().ConnectionSecretName",
+					"type": "Expression"
+				}
             }
         },
         "connectVia": {
-            "referenceName": "ir-scardella-onprem",
+            "referenceName": "ir-selfhosted-onprem",
             "type": "IntegrationRuntimeReference"
         }
     }

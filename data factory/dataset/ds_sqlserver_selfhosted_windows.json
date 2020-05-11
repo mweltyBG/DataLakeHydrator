@@ -1,0 +1,41 @@
+{
+	"name": "ds_sqlserver_selfhosted_windows",
+	"properties": {
+        "parameters": {
+            "ConnectionSecretName": {
+				"type": "string",
+				"defaultValue": "kv-sourcesystem-connstr"
+            },
+            "PasswordSecretName": {
+                "type": "string",
+                "defaultValue": "kv-sourcesystem-passwd"
+            },
+            "UserName": {
+                "type": "string",
+                "defaultValue": "SqlServer2017\\ADFWindowsUser"
+            }
+        },
+        "linkedServiceName": {
+			"referenceName": "ls_sqlserver_selfhosted_windows",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"ConnectionSecretName": {
+					"value": "@dataset().ConnectionSecretName",
+					"type": "Expression"
+                },
+                "PasswordSecretName": {
+                    "value": "@dataset().PasswordSecretName",
+                    "type": "Expression"
+                },
+                "UserName": {
+                    "value": "@dataset().UserName",
+                    "type": "Expression"
+                }
+			}
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

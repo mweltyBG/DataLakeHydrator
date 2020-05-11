@@ -1,0 +1,27 @@
+{
+	"name": "ls_adlsv2_selfhosted",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://stbgdatalakehydrator001.dfs.core.windows.net",
+			"accountKey": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_keyvault",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "kv-datalake-key"
+			}
+		},
+		"connectVia": {
+			"referenceName": "ir-selfhosted-onprem",
+			"type": "IntegrationRuntimeReference"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"connectVia": {
+		"referenceName": "ir-selfhosted-onprem",
+		"type": "IntegrationRuntimeReference"
+	}
+}

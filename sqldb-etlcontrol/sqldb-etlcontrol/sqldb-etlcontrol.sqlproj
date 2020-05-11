@@ -83,6 +83,9 @@
     <Build Include="Security\etl.sql" />
     <Build Include="etl\Functions\PerformTokenSubstitution.sql" />
     <Build Include="etl\Functions\GetLiteralFromToken.sql" />
-    <Build Include="etl\Tables\ConnectionConfig.sql" />
+    <Build Include="etl\Tables\Sources.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="sqldb-etlcontrol.refactorlog" />
   </ItemGroup>
 </Project>

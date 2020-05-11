@@ -1,0 +1,25 @@
+{
+	"name": "ds_sqlserver_selfhosted_sql",
+	"properties": {
+        "parameters": {
+            "ConnectionSecretName": {
+				"type": "string",
+				"defaultValue": "kv-sourcesystem-connstr"
+            }
+        },
+        "linkedServiceName": {
+			"referenceName": "ls_sqlserver_selfhosted_sql",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"ConnectionSecretName": {
+					"value": "@dataset().ConnectionSecretName",
+					"type": "Expression"
+				}
+			}
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

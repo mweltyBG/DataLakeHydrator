@@ -40,6 +40,13 @@
 									"value": "@pipeline().parameters.TaskAuditKey",
 									"type": "Expression"
 								}
+							},
+							"TaskKey": {
+								"type": "Int32",
+								"value": {
+									"value": "@activity('Get_Task_Info').output.firstRow.TaskKey",
+									"type": "Expression"
+								}
 							}
 						}
 					},
@@ -106,10 +113,10 @@
 					},
 					"cases": [
 						{
-							"value": "SQL Server",
+							"value": "SQLServer_SQL",
 							"activities": [
 								{
-									"name": "ingest_sql_server",
+									"name": "ingest_sqlserver_sql",
 									"type": "Copy",
 									"dependsOn": [],
 									"policy": {
@@ -139,11 +146,11 @@
 									},
 									"inputs": [
 										{
-											"referenceName": "ds_onprem_sqlserver_dynamic",
+											"referenceName": "ds_sqlserver_selfhosted_sql",
 											"type": "DatasetReference",
 											"parameters": {
-												"KeyVaultSecretName": {
-													"value": "@activity('Get_Task_Info').output.firstRow.SourceConnectionStringSecretName",
+												"ConnectionSecretName":{
+													"value": "@activity('Get_Task_Info').output.firstRow.ConnectionSecretName",
 													"type": "Expression"
 												}
 											}
@@ -151,7 +158,7 @@
 									],
 									"outputs": [
 										{
-											"referenceName": "ds_azure_datalake_parquet_dynamic",
+											"referenceName": "ds_adlsv2_selfhosted_parquet",
 											"type": "DatasetReference",
 											"parameters": {
 												"FileSystem": {
@@ -175,11 +182,11 @@
 									]
 								},
 								{
-									"name": "set_RowsCopied_sql_server",
+									"name": "set_RowsCopied_sqlserver_sql",
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "ingest_sql_server",
+											"activity": "ingest_sqlserver_sql",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -189,17 +196,17 @@
 									"typeProperties": {
 										"variableName": "RowsCopied",
 										"value": {
-											"value": "@string(activity('ingest_sql_server').output.rowsCopied)",
+											"value": "@string(activity('ingest_sqlserver_sql').output.rowsCopied)",
 											"type": "Expression"
 										}
 									}
 								},
 								{
-									"name": "set_RowsRead_sql_server",
+									"name": "set_RowsRead_sqlserver_sql",
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "set_RowsCopied_sql_server",
+											"activity": "set_RowsCopied_sqlserver_sql",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -209,7 +216,7 @@
 									"typeProperties": {
 										"variableName": "RowsRead",
 										"value": {
-											"value": "@string(activity('ingest_sql_server').output.rowsRead)",
+											"value": "@string(activity('ingest_sqlserver_sql').output.rowsRead)",
 											"type": "Expression"
 										}
 									}
@@ -217,10 +224,129 @@
 							]
 						},
 						{
-							"value": "Azure SQLDB",
+							"value": "SQLServer_WINDOWS",
 							"activities": [
 								{
-									"name": "ingest_azure_sqldb",
+									"name": "ingest_sqlserver_windows",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "SqlServerSource",
+											"sqlReaderQuery": {
+												"value": "@activity('Get_TaskQuery').output.firstRow.SourceQuery",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "ds_sqlserver_selfhosted_windows",
+											"type": "DatasetReference",
+											"parameters": {
+												"ConnectionSecretName":{
+													"value": "@activity('Get_Task_Info').output.firstRow.ConnectionSecretName",
+													"type": "Expression"
+												},
+												"UserName": {
+													"value": "@activity('Get_Task_Info').output.firstRow.UserName",
+													"type": "Expression"
+												},
+												"PasswordSecretName": {
+													"value": "@activity('Get_Task_Info').output.firstRow.PasswordSecretName",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ds_adlsv2_selfhosted_parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileSystem": {
+													"value": "@variables('DataLakeInitialContainer')",
+													"type": "Expression"
+												},
+												"Directory": {
+													"value": "@variables('DataLakeInitialFolder')",
+													"type": "Expression"
+												},
+												"File": {
+													"value": "@variables('DataLakeInitialFileName')",
+													"type": "Expression"
+												},
+												"CompressionType": {
+													"value": "@variables('DataLakeInitialFileCompressionType')",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "set_RowsCopied_sqlserver_windows",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "ingest_sqlserver_windows",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "RowsCopied",
+										"value": {
+											"value": "@string(activity('ingest_sqlserver_windows').output.rowsCopied)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "set_RowsRead_sqlserver_windows",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "set_RowsCopied_sqlserver_windows",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "RowsRead",
+										"value": {
+											"value": "@string(activity('ingest_sqlserver_windows').output.rowsRead)",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"value": "AzureSQL",
+							"activities": [
+								{
+									"name": "ingest_azuresql",
 									"type": "Copy",
 									"dependsOn": [],
 									"policy": {
@@ -250,11 +376,11 @@
 									},
 									"inputs": [
 										{
-											"referenceName": "ds_azure_sqldb_dynamic",
+											"referenceName": "ds_azuresql_autoresolveintegrationruntime",
 											"type": "DatasetReference",
 											"parameters": {
-												"KeyVaultSecretName": {
-													"value": "@activity('Get_Task_Info').output.firstRow.SourceConnectionStringSecretName",
+												"ConnectionSecretName":{
+													"value": "@activity('Get_Task_Info').output.firstRow.ConnectionSecretName",
 													"type": "Expression"
 												}
 											}
@@ -262,7 +388,7 @@
 									],
 									"outputs": [
 										{
-											"referenceName": "ds_azure_datalake_parquet_dynamic",
+											"referenceName": "ds_adlsv2_autoresolveintegrationruntime_parquet",
 											"type": "DatasetReference",
 											"parameters": {
 												"FileSystem": {
@@ -286,11 +412,11 @@
 									]
 								},
 								{
-									"name": "set_RowsCopied_azure_sqldb",
+									"name": "set_RowsCopied_azuresql",
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "ingest_azure_sqldb",
+											"activity": "ingest_azuresql",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -300,17 +426,17 @@
 									"typeProperties": {
 										"variableName": "RowsCopied",
 										"value": {
-											"value": "@string(activity('ingest_azure_sqldb').output.rowsCopied)",
+											"value": "@string(activity('ingest_azuresql').output.rowsCopied)",
 											"type": "Expression"
 										}
 									}
 								},
 								{
-									"name": "set_RowsRead_azure_sqldb",
+									"name": "set_RowsRead_azuresql",
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "set_RowsCopied_azure_sqldb",
+											"activity": "set_RowsCopied_azuresql",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -320,451 +446,7 @@
 									"typeProperties": {
 										"variableName": "RowsRead",
 										"value": {
-											"value": "@string(activity('ingest_azure_sqldb').output.rowsRead)",
-											"type": "Expression"
-										}
-									}
-								}
-							]
-						},
-						{
-							"value": "Azure SQLDW",
-							"activities": [
-								{
-									"name": "ingest_azure_sqldw",
-									"type": "Copy",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlDWSource",
-											"sqlReaderQuery": {
-												"value": "@activity('Get_TaskQuery').output.firstRow.SourceQuery",
-												"type": "Expression"
-											},
-											"queryTimeout": "02:00:00"
-										},
-										"sink": {
-											"type": "ParquetSink",
-											"storeSettings": {
-												"type": "AzureBlobFSWriteSettings"
-											}
-										},
-										"enableStaging": false
-									},
-									"inputs": [
-										{
-											"referenceName": "ds_azure_sqldw_dynamic",
-											"type": "DatasetReference",
-											"parameters": {
-												"KeyVaultSecretName": {
-													"value": "@activity('Get_Task_Info').output.firstRow.SourceConnectionStringSecret",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "ds_azure_datalake_parquet_dynamic",
-											"type": "DatasetReference",
-											"parameters": {
-												"FileSystem": {
-													"value": "@variables('DataLakeInitialContainer')",
-													"type": "Expression"
-												},
-												"Directory": {
-													"value": "@variables('DataLakeInitialFolder')",
-													"type": "Expression"
-												},
-												"File": {
-													"value": "@variables('DataLakeInitialFileName')",
-													"type": "Expression"
-												},
-												"CompressionType": {
-													"value": "@variables('DataLakeInitialFileCompressionType')",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"name": "set_RowsCopied_azure_sqldw",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "ingest_azure_sqldw",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "RowsCopied",
-										"value": {
-											"value": "@string(activity('ingest_azure_sqldw').output.rowsCopied)",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "set_RowsRead_azure_sqldw",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "set_RowsCopied_azure_sqldw",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "RowsRead",
-										"value": {
-											"value": "@string(activity('ingest_azure_sqldw').output.rowsRead)",
-											"type": "Expression"
-										}
-									}
-								}
-							]
-						},
-						{
-							"value": "Azure MySQL",
-							"activities": [
-								{
-									"name": "ingest_azure_mysql",
-									"type": "Copy",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "AzureMySqlSource",
-											"query": {
-												"value": "@activity('Get_TaskQuery').output.firstRow.SourceQuery",
-												"type": "Expression"
-											},
-											"queryTimeout": "02:00:00"
-										},
-										"sink": {
-											"type": "ParquetSink",
-											"storeSettings": {
-												"type": "AzureBlobFSWriteSettings"
-											}
-										},
-										"enableStaging": false
-									},
-									"inputs": [
-										{
-											"referenceName": "ds_azure_mysql_dynamic",
-											"type": "DatasetReference",
-											"parameters": {
-												"KeyVaultSecretName": {
-													"value": "@activity('Get_Task_Info').output.firstRow.SourceConnectionStringSecretName",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "ds_azure_datalake_parquet_dynamic",
-											"type": "DatasetReference",
-											"parameters": {
-												"FileSystem": {
-													"value": "@variables('DataLakeInitialContainer')",
-													"type": "Expression"
-												},
-												"Directory": {
-													"value": "@variables('DataLakeInitialFolder')",
-													"type": "Expression"
-												},
-												"File": {
-													"value": "@variables('DataLakeInitialFileName')",
-													"type": "Expression"
-												},
-												"CompressionType": {
-													"value": "@variables('DataLakeInitialFileCompressionType')",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"name": "set_RowsCopied_azure_mysql",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "ingest_azure_mysql",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "RowsCopied",
-										"value": {
-											"value": "@string(activity('ingest_azure_mysql').output.rowsCopied)",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "set_RowsRead_azure_mysql",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "set_RowsCopied_azure_mysql",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "RowsRead",
-										"value": {
-											"value": "@string(activity('ingest_azure_mysql').output.rowsRead)",
-											"type": "Expression"
-										}
-									}
-								}
-							]
-						},
-						{
-							"value": "Oracle",
-							"activities": [
-								{
-									"name": "ingest_oracle",
-									"type": "Copy",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "OracleSource",
-											"oracleReaderQuery": {
-												"value": "@activity('Get_TaskQuery').output.firstRow.SourceQuery",
-												"type": "Expression"
-											},
-											"partitionOption": "None",
-											"queryTimeout": "02:00:00"
-										},
-										"sink": {
-											"type": "ParquetSink",
-											"storeSettings": {
-												"type": "AzureBlobFSWriteSettings"
-											}
-										},
-										"enableStaging": false
-									},
-									"inputs": [
-										{
-											"referenceName": "ds_onprem_oracle_dynamic",
-											"type": "DatasetReference",
-											"parameters": {
-												"KeyVaultSecretName": {
-													"value": "@activity('Get_Task_Info').output.firstRow.SourceConnectionStringSecretName",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "ds_azure_datalake_parquet_dynamic",
-											"type": "DatasetReference",
-											"parameters": {
-												"FileSystem": {
-													"value": "@variables('DataLakeInitialContainer')",
-													"type": "Expression"
-												},
-												"Directory": {
-													"value": "@variables('DataLakeInitialFolder')",
-													"type": "Expression"
-												},
-												"File": {
-													"value": "@variables('DataLakeInitialFileName')",
-													"type": "Expression"
-												},
-												"CompressionType": {
-													"value": "@variables('DataLakeInitialFileCompressionType')",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"name": "set_RowsCopied_oracle",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "ingest_oracle",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "RowsCopied",
-										"value": {
-											"value": "@string(activity('ingest_oracle').output.rowsCopied)",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "set_RowsRead_oracle",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "set_RowsCopied_oracle",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "RowsRead",
-										"value": {
-											"value": "@string(activity('ingest_oracle').output.rowsRead)",
-											"type": "Expression"
-										}
-									}
-								}
-							]
-						},
-						{
-							"value": "MySQL",
-							"activities": [
-								{
-									"name": "ingest_mysql",
-									"type": "Copy",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "MySqlSource",
-											"query": {
-												"value": "@activity('Get_TaskQuery').output.firstRow.SourceQuery",
-												"type": "Expression"
-											}
-										},
-										"sink": {
-											"type": "ParquetSink",
-											"storeSettings": {
-												"type": "AzureBlobFSWriteSettings"
-											}
-										},
-										"enableStaging": false
-									},
-									"inputs": [
-										{
-											"referenceName": "ds_onprem_mysql_dynamic",
-											"type": "DatasetReference",
-											"parameters": {
-												"KeyVaultSecretName": {
-													"value": "@activity('Get_Task_Info').output.firstRow.SourceConnectionStringSecretName",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "ds_azure_datalake_parquet_dynamic",
-											"type": "DatasetReference",
-											"parameters": {
-												"FileSystem": {
-													"value": "@variables('DataLakeInitialContainer')",
-													"type": "Expression"
-												},
-												"Directory": {
-													"value": "@variables('DataLakeInitialFolder')",
-													"type": "Expression"
-												},
-												"File": {
-													"value": "@variables('DataLakeInitialFileName')",
-													"type": "Expression"
-												},
-												"CompressionType": {
-													"value": "@variables('DataLakeInitialFileCompressionType')",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"name": "set_RowsCopied_mysql",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "ingest_mysql",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "RowsCopied",
-										"value": {
-											"value": "@string(activity('ingest_mysql').output.rowsCopied)",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "set_RowsRead_mysql",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "set_RowsCopied_mysql",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "RowsRead",
-										"value": {
-											"value": "@string(activity('ingest_mysql').output.rowsRead)",
+											"value": "@string(activity('ingest_azuresql').output.rowsRead)",
 											"type": "Expression"
 										}
 									}
@@ -1094,7 +776,7 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "ds_azure_datalake_parquet_dynamic",
+									"referenceName": "ds_adlsv2_autoresolveintegrationruntime_parquet",
 									"type": "DatasetReference",
 									"parameters": {
 										"FileSystem": {
@@ -1118,7 +800,7 @@
 							],
 							"outputs": [
 								{
-									"referenceName": "ds_azure_datalake_parquet_dynamic",
+									"referenceName": "ds_adlsv2_autoresolveintegrationruntime_parquet",
 									"type": "DatasetReference",
 									"parameters": {
 										"FileSystem": {

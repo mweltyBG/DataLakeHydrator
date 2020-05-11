@@ -9,9 +9,16 @@ AS
 	SET NOCOUNT ON
 
 
+<<<<<<< HEAD
+-- This constructs the query against the source database. One goal is to add additional "SourceType" database support.
+-- Current SourceTypes supported are
+	-- "SQLServer": on-premise SQL database
+	-- "AzureSQL": Azure SQL Database
+=======
 
 --DECLARE @TaskAuditKey INT = 54
 --DECLARE @ETLExtractDatetime DATETIME = '1900-01-01'
+>>>>>>> master
 
 	DECLARE @ErrorMessage NVARCHAR(2048) -- just declare this here. there are several spots later where we may attempt to use this
 
@@ -34,7 +41,7 @@ AS
 
 -- The following are the incoming values that the stored procedure gathers from the etl.Task table:
 	DECLARE @SourceType NVARCHAR(200) -- (required) type of source system (see supported options above)
-	DECLARE @SourceDatabaseName NVARCHAR(200) -- (possibly required) database/catalog name
+	--DECLARE @SourceDatabaseName NVARCHAR(200) -- (possibly required) database/catalog name
 	DECLARE @SourceSchemaName NVARCHAR(200) -- (possibly required)
 	DECLARE @SourceTableName NVARCHAR(200) -- (required unless "SourceQuery" is used)
 	DECLARE @SourceWhereClause NVARCHAR(4000) -- (optional) used with SourceTableName to support custom filtering, also required for incremental functionality
@@ -55,8 +62,13 @@ AS
 	DECLARE @DisableAction BIT -- (optional) when set to true, disables this task
 
 	SELECT
+<<<<<<< HEAD
+		@SourceType = ISNULL(S.SourceType, 'SQLServer'),
+		--@SourceDatabaseName = ISNULL(SourceDatabaseName, ''), 
+=======
 		@SourceType = ISNULL(ConnectionConfig.ConnectionType, ''),
 		@SourceDatabaseName = ISNULL(SourceDatabaseName, ''), 
+>>>>>>> master
 		@SourceSchemaName = ISNULL(SourceSchemaName, ''), 
 		@SourceTableName = ISNULL(SourceTableName, ''),
 		@SourceColumnList = ISNULL(SourceColumnList, ''), 
@@ -76,6 +88,15 @@ AS
 		@LimitType = ISNULL(LimitType, ''),
 		@DisableAction = ISNULL(DisableAction, 0)
 
+<<<<<<< HEAD
+	FROM 
+		etl.Task as T
+		LEFT JOIN etl.Source as S
+			ON T.SourceName = S.SourceName
+	WHERE T.TaskKey= @TaskKey
+
+	
+=======
 	FROM etl.Task
 	LEFT OUTER JOIN etl.ConnectionConfig
 		ON Task.SourceName = ConnectionConfig.ConnectionName
@@ -87,6 +108,7 @@ AS
 		THROW 50000, @ErrorMessage, 1;
 	END
 	ELSE
+>>>>>>> master
 	BEGIN
 
 		-- 	Begin constucting the source system query using all the prior options/input
@@ -100,7 +122,11 @@ AS
 			-- build a custom query based on all the supplied options
 			SET @Query = 'SELECT '
 
+<<<<<<< HEAD
+			IF @IsSelectDistinctFlag = 1 AND @SourceType IN ('SQLServer','AzureSQL')
+=======
 			IF @IsSelectDistinctFlag = 1 AND @SourceType IN ('Azure SQLDB', 'SQL Server')
+>>>>>>> master
 				SET @Query = @Query + 'DISTINCT '
 
 			-- Columns
@@ -134,12 +160,16 @@ AS
 			SET @Query = @Query + ', ' + @MetadataColumns + ' '
 
 			-- FROM Clause
+<<<<<<< HEAD
+			IF @SourceType IN ('AzureSQL','SQLServer')
+=======
 			IF @SourceType IN ('Azure SQLDB', 'SQL Server')
+>>>>>>> master
 			BEGIN
 				SET @Query = @Query + 'FROM '
 
-				IF @SourceDatabaseName != ''
-					SET @Query = @Query + '[' + @SourceDatabaseName + '].'
+				--IF @SourceDatabaseName != ''
+					--SET @Query = @Query + '[' + @SourceDatabaseName + '].'
 
 				IF @SourceSchemaName != ''
 					SET @Query = @Query + '[' + @SourceSchemaName + '].'

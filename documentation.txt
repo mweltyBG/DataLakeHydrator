@@ -1,9 +1,50 @@
 The intent of this framework is to be simple and easy to get started for simple projects, while still having enough options and extensibility to grow for more complex projects. To get started you truly only need to populate one table, which is "etl.Task". All other tables provide additional optional functionality.
 
+Initial deployment:
+You will need the following set up in your Azure subscription:
+- Key Vault
+- an empty Azure SQL Database to host the configuration information
+- an empty Azure Data Factory
+    - do not set up the self-hosted integration runtime
+    - do not set up source code integration
+- an Azure data lake v2 storage account (hierarchical storage enabled)
+- Unless all your source systems can be reached by the autoresolveintegrationruntime, you need an on-prem box with the following installed
+    - We'll walk you through some of the integration runtime setup bits, so don't jump ahead!
+    - Java Runtime Environment (x64) - please double-check that you have the x64 version!
+    - Visual C++ 2010 redistributable (x64)
+
+Setting up Key Vault
+- Ensure that your Data Factory has Get and List permissions
+- set up a secret named kv-etlcontrol-connstr with the connection string (including user name and password) for your configuration Database
+- set up a secret named kv-datalake-key with the access key to your adlsv2 account
+- you can hold off setting up the connection strings for other sources until later.
+
+Setting up Data Factory (for dev work)
+- in Data Factory, create an integration runtime named ir-selfhosted-onprem
+    - install on the server, etc.
+    - click on the code button next to ir-selfhosted-onprem and save the JSON for the integration runtime.
+- Open up your git tool of choice
+    - Open up BG-Commit\DataLakeHydrator and create a new branch
+    - download the new branch to someplace handy with your Git tool of choice
+- In a text editor (I suggest Visual Studio Code) make a few changes to the linked services JSON files:
+    - change the URL in the ls_adlsv2_autoresolveintegrationruntime and ls_adlsv2_selfhosted linked services to your storage account
+    - change the URL in the ls_keyvault to your keyvault account
+    - in ir-selfhosted-onprem.json, paste in the code that you saved earlier for YOUR integration runtime.
+- Commit and push the changes to BG-Commit
+- Connect your Data Factory to BG-Commit\DataLakeHydrator.
+    Github account: BG-Commit
+    root folder: /data Factory
+    Collaboration branch: the branch you made
+- Set up the control database and test things out.
+
+Setting up the control Database
+- You can either use schema compare to deploy the structure OR use a bacpac file.  Just get the structure applied to it.
+- Then you can start configuring etl.Tasks, etl.Source and other stuff
+
+Tasks:
 The "etl.Task" table contains a row for each table you want to import. The minimum fields you should enter are (more or less):
 
-SourceName: the name you've decided to give the source system
-SourceType: SQL (currently only on-prem SQL supported, but I think we can pretty rapidly ramp up support for other database types). this is supposed to be an enum on those different supported types
+SourceName: the name you've decided to give the source system. It assumes that the source system is handled specifically in ADF unless you add an entry to etl.Source
 SourceTableName: name of the table you want to import
 TargetDataLakeContainer: the name of the storage account container you want to save the parquet file to
 TargetDataLakeFolder: destination folder
@@ -23,6 +64,14 @@ The etl.TaskAudit table was pre-seeded with tasks during the "pl_job_master" pip
 
 The "pl_standard_ingest" pipeline takes a particular "TaskAuditKey" value as a parameter. It joins this back to the etl.Task table to get the info it needs to copy the data from the source system into a parquet file within the data lake. It adds the "TaskAuditKey" value to the parquet filename for traceability.
 
+Sources:
+This is used to override default behaviors for a source, allowing you to specify the type, authentication, custom keyvault secret names, user names and if you really want to get crazy, integration runtime.  Talk to Steve Cardella if you want to specify the integration runtimes.
+Type - currently supported is SQLServer or AzureSQL.  Any other type would require you to make an addition to the switch statement and check constraint on etl.Source.
+Authentication - for SQLServer, it allows you to specify "SQL" for SQL authentication or "WINDOWS" for Windows authentication (Active directory, etc.)
+UserName - If you are using windows authentication, specify the Domain\Username here.
+IntegrationRuntimeName - If you're using multiple self-hosted integration runtimes, you specify which integration runtime you want here.  If you specify something here, you need extra entries in the switch statement and supporting datasets/linked services.
+ConnectionStringSecret - Fill this in if you need to override the connection string secret name.  It is case sensitive!  The default is 'kv-'+SourceName+'-connstr'.
+PasswordSecret - If you're using windows authentication, use this to override the password secret name.  It is case sensitive!  The default is 'kv-'+SourceName+'-passwd'.
 
 
 Table descriptions:
