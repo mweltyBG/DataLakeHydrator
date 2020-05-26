@@ -8,17 +8,10 @@ CREATE PROCEDURE [etl].[GetTaskQuery]
 AS
 	SET NOCOUNT ON
 
-
-<<<<<<< HEAD
 -- This constructs the query against the source database. One goal is to add additional "SourceType" database support.
 -- Current SourceTypes supported are
 	-- "SQLServer": on-premise SQL database
 	-- "AzureSQL": Azure SQL Database
-=======
-
---DECLARE @TaskAuditKey INT = 54
---DECLARE @ETLExtractDatetime DATETIME = '1900-01-01'
->>>>>>> master
 
 	DECLARE @ErrorMessage NVARCHAR(2048) -- just declare this here. there are several spots later where we may attempt to use this
 
@@ -62,13 +55,9 @@ AS
 	DECLARE @DisableAction BIT -- (optional) when set to true, disables this task
 
 	SELECT
-<<<<<<< HEAD
 		@SourceType = ISNULL(S.SourceType, 'SQLServer'),
 		--@SourceDatabaseName = ISNULL(SourceDatabaseName, ''), 
-=======
-		@SourceType = ISNULL(ConnectionConfig.ConnectionType, ''),
-		@SourceDatabaseName = ISNULL(SourceDatabaseName, ''), 
->>>>>>> master
+
 		@SourceSchemaName = ISNULL(SourceSchemaName, ''), 
 		@SourceTableName = ISNULL(SourceTableName, ''),
 		@SourceColumnList = ISNULL(SourceColumnList, ''), 
@@ -88,27 +77,12 @@ AS
 		@LimitType = ISNULL(LimitType, ''),
 		@DisableAction = ISNULL(DisableAction, 0)
 
-<<<<<<< HEAD
 	FROM 
 		etl.Task as T
 		LEFT JOIN etl.Source as S
 			ON T.SourceName = S.SourceName
 	WHERE T.TaskKey= @TaskKey
 
-	
-=======
-	FROM etl.Task
-	LEFT OUTER JOIN etl.ConnectionConfig
-		ON Task.SourceName = ConnectionConfig.ConnectionName
-	WHERE Task.TaskKey= @TaskKey
-
-	IF @SourceType NOT IN (SELECT SourceType FROM @SupportedTypes)
-	BEGIN
-		SET @ErrorMessage =  'Error: SourceType "' + @SourceType + '" defined by TaskKey "' + CONVERT(VARCHAR(5), @TaskKey) + '" is not currently a supported SourceType. Supported SourceType options are: ' + (SELECT STRING_AGG(SourceType, ', ') FROM @SupportedTypes);
-		THROW 50000, @ErrorMessage, 1;
-	END
-	ELSE
->>>>>>> master
 	BEGIN
 
 		-- 	Begin constucting the source system query using all the prior options/input
@@ -122,11 +96,8 @@ AS
 			-- build a custom query based on all the supplied options
 			SET @Query = 'SELECT '
 
-<<<<<<< HEAD
 			IF @IsSelectDistinctFlag = 1 AND @SourceType IN ('SQLServer','AzureSQL')
-=======
-			IF @IsSelectDistinctFlag = 1 AND @SourceType IN ('Azure SQLDB', 'SQL Server')
->>>>>>> master
+
 				SET @Query = @Query + 'DISTINCT '
 
 			-- Columns
@@ -160,11 +131,7 @@ AS
 			SET @Query = @Query + ', ' + @MetadataColumns + ' '
 
 			-- FROM Clause
-<<<<<<< HEAD
 			IF @SourceType IN ('AzureSQL','SQLServer')
-=======
-			IF @SourceType IN ('Azure SQLDB', 'SQL Server')
->>>>>>> master
 			BEGIN
 				SET @Query = @Query + 'FROM '
 

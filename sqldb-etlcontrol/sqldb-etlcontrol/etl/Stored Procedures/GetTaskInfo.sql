@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [etl].[GetTaskInfo] 
+﻿
+CREATE PROCEDURE [etl].[GetTaskInfo] 
 	@TaskAuditKey INT
 AS
 
@@ -212,16 +213,16 @@ DECLARE @connectionType NVARCHAR(50), @connectionStringSecretName NVARCHAR(2000)
 DECLARE @sourceName NVARCHAR(200), @taskKey INT, @connectionName NVARCHAR(200) -- grab these just to use in the error message in case we have an error
 
 SELECT
-	@connectionType = ConnectionConfig.ConnectionType,
-	@connectionStringSecretName = ConnectionConfig.ConnectionStringSecretName,
+	@connectionType = Source.SourceType,
+	@connectionStringSecretName = '',
 	@sourceName = Task.SourceName,
 	@taskKey = Task.TaskKey,
-	@connectionName = ConnectionName
+	@connectionName = Source.SourceName
 FROM etl.TaskAudit 
 INNER JOIN etl.Task 
 	ON TaskAudit.TaskKey = Task.TaskKey
-LEFT OUTER JOIN etl.ConnectionConfig
-	ON Task.SourceName = ConnectionConfig.ConnectionName
+LEFT OUTER JOIN etl.Source
+	ON Task.SourceName = Source.SourceName
 WHERE TaskAuditKey = @TaskAuditKey
 
 IF @connectionType IS NULL OR @connectionStringSecretName IS NULL
@@ -287,7 +288,7 @@ SELECT
 
 	ISNULL((SELECT TOP 1 ConfigValue FROM etl.KeyValueConfig WHERE ConfigKey = 'LandingAreaFileCompressionType'), 'snappy') AS TransientLandingAreaFileCompressionType,
 	ISNULL((SELECT TOP 1 ConfigValue FROM etl.KeyValueConfig WHERE ConfigKey = 'RawFileCompressionType'), 'snappy') AS PersistedRawFileCompressionType,
-	ISNULL((SELECT TOP 1 ConfigValue FROM etl.KeyValueConfig WHERE ConfigKey = 'CuratedFileCompressionType'), 'snappy') AS CuratedFileCompressionType
+	ISNULL((SELECT TOP 1 ConfigValue FROM etl.KeyValueConfig WHERE ConfigKey = 'CuratedFileCompressionType'), 'snappy') AS CuratedFileCompressionType,
 
 	Task.DataIntegrationUnits,
 	Task.DegreeOfParallelism 
