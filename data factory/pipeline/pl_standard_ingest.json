@@ -40,13 +40,6 @@
 									"value": "@pipeline().parameters.TaskAuditKey",
 									"type": "Expression"
 								}
-							},
-							"TaskKey": {
-								"type": "Int32",
-								"value": {
-									"value": "@activity('Get_Task_Info').output.firstRow.TaskKey",
-									"type": "Expression"
-								}
 							}
 						}
 					},
@@ -149,7 +142,7 @@
 											"referenceName": "ds_sqlserver_selfhosted_sql",
 											"type": "DatasetReference",
 											"parameters": {
-												"ConnectionSecretName":{
+												"ConnectionSecretName": {
 													"value": "@activity('Get_Task_Info').output.firstRow.ConnectionSecretName",
 													"type": "Expression"
 												}
@@ -260,7 +253,7 @@
 											"referenceName": "ds_sqlserver_selfhosted_windows",
 											"type": "DatasetReference",
 											"parameters": {
-												"ConnectionSecretName":{
+												"ConnectionSecretName": {
 													"value": "@activity('Get_Task_Info').output.firstRow.ConnectionSecretName",
 													"type": "Expression"
 												},
@@ -379,7 +372,7 @@
 											"referenceName": "ds_azuresql_autoresolveintegrationruntime",
 											"type": "DatasetReference",
 											"parameters": {
-												"ConnectionSecretName":{
+												"ConnectionSecretName": {
 													"value": "@activity('Get_Task_Info').output.firstRow.ConnectionSecretName",
 													"type": "Expression"
 												}
