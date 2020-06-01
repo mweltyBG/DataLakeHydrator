@@ -1,19 +1,19 @@
 {
-    "name": "ls_adlsv2_autoresolveintegrationruntime",
-    "properties": {
-        "annotations": [],
-        "type": "AzureBlobFS",
-        "typeProperties": {
-            "url": "https://stbgdatalakehydrator001.dfs.core.windows.net",
-            "accountKey": {
-                "type": "AzureKeyVaultSecret",
-                "store": {
-                    "referenceName": "ls_keyvault",
-                    "type": "LinkedServiceReference"
-                },
-                "secretName": "kv-datalake-key"
-            }
-        }
-    },
-    "type": "Microsoft.DataFactory/factories/linkedservices"
+	"name": "ls_adlsv2_autoresolveintegrationruntime",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://mwsdbx.dfs.core.windows.net/",
+			"accountKey": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_keyvault",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "kv-datalake-key"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
 }
