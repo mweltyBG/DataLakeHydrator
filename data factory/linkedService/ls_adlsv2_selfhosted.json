@@ -13,10 +13,6 @@
 				},
 				"secretName": "kv-datalake-key"
 			}
-		},
-		"connectVia": {
-			"referenceName": "ir-selfhosted-onprem",
-			"type": "IntegrationRuntimeReference"
 		}
 	},
 	"type": "Microsoft.DataFactory/factories/linkedservices",
