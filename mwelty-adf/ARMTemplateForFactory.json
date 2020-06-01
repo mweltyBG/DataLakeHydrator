@@ -1872,14 +1872,9 @@
 						},
 						"secretName": "kv-datalake-key"
 					}
-				},
-				"connectVia": {
-					"referenceName": "ir-selfhosted-onprem",
-					"type": "IntegrationRuntimeReference"
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/ir-selfhosted-onprem')]",
 				"[concat(variables('factoryId'), '/linkedServices/ls_keyvault')]"
 			]
 		},
