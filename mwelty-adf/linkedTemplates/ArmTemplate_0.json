@@ -531,7 +531,7 @@
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"linkedServiceName": {
-					"referenceName": "ls_adlsv2_selfhosted",
+					"referenceName": "ls_adlsv2_autoresolveintegrationruntime",
 					"type": "LinkedServiceReference"
 				},
 				"parameters": {
@@ -574,7 +574,7 @@
 				"schema": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_adlsv2_selfhosted')]"
+				"[concat(variables('factoryId'), '/linkedServices/ls_adlsv2_autoresolveintegrationruntime')]"
 			]
 		},
 		{
