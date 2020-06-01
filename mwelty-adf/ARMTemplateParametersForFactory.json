@@ -1,0 +1,51 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "mwelty-adf"
+		},
+		"ls_adlsv2_autoresolveintegrationruntime_properties_typeProperties_url": {
+			"value": "https://mwsdbx.dfs.core.windows.net/"
+		},
+		"ls_adlsv2_selfhosted_properties_typeProperties_url": {
+			"value": "https://mwsdbx.dfs.core.windows.net/"
+		},
+		"ls_azure_mysql_dynamic_properties_typeProperties_connectionString_secretName": {
+			"value": "@linkedService().KeyVaultSecretName"
+		},
+		"ls_azure_sqldb_dynamic_properties_typeProperties_connectionString_secretName": {
+			"value": "@linkedService().KeyVaultSecretName"
+		},
+		"ls_azure_sqldb_etlcontrol_properties_typeProperties_connectionString_secretName": {
+			"value": "kv-etlcontrol-connstr"
+		},
+		"ls_azure_sqldw_dynamic_properties_typeProperties_connectionString_secretName": {
+			"value": "@linkedService().KeyVaultSecretName"
+		},
+		"ls_azuresql_autoresolveintegrationruntime_properties_typeProperties_connectionString_secretName": {
+			"value": "@linkedService().ConnectionSecretName"
+		},
+		"ls_keyvault_properties_typeProperties_baseUrl": {
+			"value": "https://mwsdbxkv.vault.azure.net/"
+		},
+		"ls_onprem_mysql_dynamic_properties_typeProperties_connectionString_secretName": {
+			"value": "@linkedService().KeyVaultSecretName"
+		},
+		"ls_onprem_oracle_dynamic_properties_typeProperties_connectionString_secretName": {
+			"value": "@linkedService().KeyVaultSecretName"
+		},
+		"ls_onprem_sqlserver_dynamic_properties_typeProperties_connectionString_secretName": {
+			"value": "@linkedService().KeyVaultSecretName"
+		},
+		"ls_sqlserver_selfhosted_sql_properties_typeProperties_connectionString_secretName": {
+			"value": "@linkedService().ConnectionSecretName"
+		},
+		"ls_sqlserver_selfhosted_windows_properties_typeProperties_connectionString_secretName": {
+			"value": "@linkedService().ConnectionSecretName"
+		},
+		"ls_sqlserver_selfhosted_windows_properties_typeProperties_userName": {
+			"value": "@{linkedService().UserName}"
+		}
+	}
+}

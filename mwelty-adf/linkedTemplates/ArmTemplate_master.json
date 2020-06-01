@@ -1,0 +1,160 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "mwelty-adf"
+		},
+		"ls_adlsv2_autoresolveintegrationruntime_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://mwsdbx.dfs.core.windows.net/"
+		},
+		"ls_adlsv2_selfhosted_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://mwsdbx.dfs.core.windows.net/"
+		},
+		"ls_azure_mysql_dynamic_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "@linkedService().KeyVaultSecretName"
+		},
+		"ls_azure_sqldb_dynamic_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "@linkedService().KeyVaultSecretName"
+		},
+		"ls_azure_sqldb_etlcontrol_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "kv-etlcontrol-connstr"
+		},
+		"ls_azure_sqldw_dynamic_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "@linkedService().KeyVaultSecretName"
+		},
+		"ls_azuresql_autoresolveintegrationruntime_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "@linkedService().ConnectionSecretName"
+		},
+		"ls_keyvault_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://mwsdbxkv.vault.azure.net/"
+		},
+		"ls_onprem_mysql_dynamic_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "@linkedService().KeyVaultSecretName"
+		},
+		"ls_onprem_oracle_dynamic_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "@linkedService().KeyVaultSecretName"
+		},
+		"ls_onprem_sqlserver_dynamic_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "@linkedService().KeyVaultSecretName"
+		},
+		"ls_sqlserver_selfhosted_sql_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "@linkedService().ConnectionSecretName"
+		},
+		"ls_sqlserver_selfhosted_windows_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "@linkedService().ConnectionSecretName"
+		},
+		"ls_sqlserver_selfhosted_windows_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "@{linkedService().UserName}"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"ls_keyvault_properties_typeProperties_baseUrl": {
+						"value": "[parameters('ls_keyvault_properties_typeProperties_baseUrl')]"
+					},
+					"ls_adlsv2_autoresolveintegrationruntime_properties_typeProperties_url": {
+						"value": "[parameters('ls_adlsv2_autoresolveintegrationruntime_properties_typeProperties_url')]"
+					},
+					"ls_adlsv2_selfhosted_properties_typeProperties_url": {
+						"value": "[parameters('ls_adlsv2_selfhosted_properties_typeProperties_url')]"
+					},
+					"ls_azure_mysql_dynamic_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('ls_azure_mysql_dynamic_properties_typeProperties_connectionString_secretName')]"
+					},
+					"ls_azure_sqldb_dynamic_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('ls_azure_sqldb_dynamic_properties_typeProperties_connectionString_secretName')]"
+					},
+					"ls_azure_sqldb_etlcontrol_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('ls_azure_sqldb_etlcontrol_properties_typeProperties_connectionString_secretName')]"
+					},
+					"ls_azure_sqldw_dynamic_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('ls_azure_sqldw_dynamic_properties_typeProperties_connectionString_secretName')]"
+					},
+					"ls_azuresql_autoresolveintegrationruntime_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('ls_azuresql_autoresolveintegrationruntime_properties_typeProperties_connectionString_secretName')]"
+					},
+					"ls_onprem_mysql_dynamic_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('ls_onprem_mysql_dynamic_properties_typeProperties_connectionString_secretName')]"
+					},
+					"ls_onprem_oracle_dynamic_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('ls_onprem_oracle_dynamic_properties_typeProperties_connectionString_secretName')]"
+					},
+					"ls_onprem_sqlserver_dynamic_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('ls_onprem_sqlserver_dynamic_properties_typeProperties_connectionString_secretName')]"
+					},
+					"ls_sqlserver_selfhosted_sql_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('ls_sqlserver_selfhosted_sql_properties_typeProperties_connectionString_secretName')]"
+					},
+					"ls_sqlserver_selfhosted_windows_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('ls_sqlserver_selfhosted_windows_properties_typeProperties_connectionString_secretName')]"
+					},
+					"ls_sqlserver_selfhosted_windows_properties_typeProperties_userName": {
+						"value": "[parameters('ls_sqlserver_selfhosted_windows_properties_typeProperties_userName')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_0')]"
+			]
+		}
+	]
+}
